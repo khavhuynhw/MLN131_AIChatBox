@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiểm tra kiến thức - Tư tưởng Hồ Chí Minh</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="global-styles.css">
+    <link rel="stylesheet" href="quiz.css">
+</head>
+<body>
+    <!-- Floating Particles -->
+    <div class="particles"></div>
+    
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <h1>Kiểm tra kiến thức Tư tưởng Hồ Chí Minh</h1>
+            </div>
+            <div class="user-info">
+                <span id="userDisplay">
+                    <i class="fas fa-user"></i>
+                    <span id="username">Đang tải...</span>
+                </span>
+                <button onclick="window.location.href='chat.html'" class="btn-secondary">
+                    <i class="fas fa-comments"></i>
+                    Quay lại Chat
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Quiz Creation Section -->
+        <section id="quizCreation" class="quiz-section">
+            <div class="section-header">
+                <h2><i class="fas fa-magic"></i> Tạo bài kiểm tra mới</h2>
+                <button id="btnHistory" class="btn-history" onclick="showHistory()">
+                    <i class="fas fa-history"></i>
+                    Lịch sử làm bài
+                </button>
+            </div>
+
+            <div class="quiz-form">
+                <div class="form-group">
+                    <label>Chọn chương:</label>
+                    <select id="chapterSelect" class="form-control">
+                        <option value="">-- Chọn chương --</option>
+                        <option value="Chương I">Chương I - Đối tượng, phương pháp nghiên cứu</option>
+                        <option value="Chương II">Chương II - Cơ sở hình thành tư tưởng Hồ Chí Minh</option>
+                        <option value="Chương III">Chương III - Tư tưởng về độc lập dân tộc</option>
+                        <option value="Chương IV">Chương IV - Tư tưởng về CNXH và con đường đi lên CNXH</option>
+                        <option value="Chương V">Chương V - Tư tưởng về Đảng Cộng sản Việt Nam</option>
+                        <option value="Chương VI">Chương VI - Tư tưởng về đại đoàn kết toàn dân tộc</option>
+                        <option value="Tất cả">Tất cả các chương</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Số lượng câu hỏi:</label>
+                    <div class="number-select">
+                        <button type="button" onclick="changeQuestionCount(-5)">-</button>
+                        <input type="number" id="numQuestions" value="15" min="5" max="30" class="form-control">
+                        <button type="button" onclick="changeQuestionCount(5)">+</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Độ khó:</label>
+                    <div class="difficulty-select">
+                        <button type="button" class="diff-btn" data-difficulty="easy">
+                            <i class="fas fa-smile"></i> Dễ
+                        </button>
+                        <button type="button" class="diff-btn active" data-difficulty="medium">
+                            <i class="fas fa-meh"></i> Trung bình
+                        </button>
+                        <button type="button" class="diff-btn" data-difficulty="hard">
+                            <i class="fas fa-frown"></i> Khó
+                        </button>
+                    </div>
+                </div>
+
+                <button id="btnGenerate" class="btn-primary" onclick="generateQuiz()">
+                    <i class="fas fa-wand-magic-sparkles"></i>
+                    Tạo bài kiểm tra
+                </button>
+            </div>
+
+            <!-- Loading -->
+            <div id="loadingContainer" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p>AI đang tạo câu hỏi cho bạn...</p>
+            </div>
+
+            <!-- Quiz ready notification -->
+            <div id="quizReady" class="quiz-ready" style="display: none;">
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h3>Bài kiểm tra đã sẵn sàng!</h3>
+                <p id="quizInfo"></p>
+                <button class="btn-start" onclick="startQuiz()">
+                    <i class="fas fa-play"></i>
+                    Bắt đầu làm bài
+                </button>
+            </div>
+        </section>
+
+        <!-- Quiz Taking Section -->
+        <section id="quizTaking" class="quiz-section" style="display: none;">
+            <div class="quiz-header">
+                <div class="quiz-title">
+                    <h2 id="quizTitle">Bài kiểm tra</h2>
+                    <span id="quizMeta" class="meta-info"></span>
+                </div>
+                <div class="quiz-timer">
+                    <i class="fas fa-clock"></i>
+                    <span id="timer">00:00</span>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress-bar">
+                <div id="progressFill" class="progress-fill"></div>
+                <span id="progressText" class="progress-text">0/0</span>
+            </div>
+
+            <!-- Question Container -->
+            <div id="questionContainer" class="question-container">
+                <!-- Questions will be inserted here -->
+            </div>
+
+            <!-- Navigation -->
+            <div class="quiz-navigation">
+                <button id="btnPrev" class="btn-nav" onclick="prevQuestion()">
+                    <i class="fas fa-chevron-left"></i> Câu trước
+                </button>
+                <span id="questionNumber">Câu 1/10</span>
+                <button id="btnNext" class="btn-nav" onclick="nextQuestion()">
+                    Câu tiếp <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <!-- Question Map -->
+            <div class="question-map">
+                <h4>Danh sách câu hỏi:</h4>
+                <div id="questionMap" class="question-buttons">
+                    <!-- Question buttons will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="submit-container">
+                <button id="btnSubmit" class="btn-submit" onclick="submitQuiz()">
+                    <i class="fas fa-paper-plane"></i>
+                    Nộp bài
+                </button>
+            </div>
+        </section>
+
+        <!-- Result Section -->
+        <section id="quizResult" class="quiz-section" style="display: none;">
+            <div class="result-header">
+                <h2>Kết quả bài kiểm tra</h2>
+            </div>
+
+            <div class="result-score">
+                <div class="score-circle">
+                    <svg viewBox="0 0 200 200">
+                        <circle cx="100" cy="100" r="90" fill="none" stroke="#e0e0e0" stroke-width="10"/>
+                        <circle id="scoreCircle" cx="100" cy="100" r="90" fill="none" 
+                                stroke="url(#gradient)" stroke-width="10"
+                                stroke-dasharray="565" stroke-dashoffset="565"
+                                transform="rotate(-90 100 100)"/>
+                        <defs>
+                            <linearGradient id="gradient">
+                                <stop offset="0%" stop-color="#4caf50"/>
+                                <stop offset="100%" stop-color="#8bc34a"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <div class="score-text">
+                        <span id="scoreNumber">0</span>
+                        <span class="score-label">Điểm</span>
+                    </div>
+                </div>
+
+                <div class="result-stats">
+                    <div class="stat-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span id="correctCount">0</span>
+                        <label>Đúng</label>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-times-circle"></i>
+                        <span id="wrongCount">0</span>
+                        <label>Sai</label>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-percentage"></i>
+                        <span id="percentage">0%</span>
+                        <label>Tỷ lệ</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="result-message">
+                <h3 id="resultMessage">Kết quả của bạn</h3>
+                <p id="resultDescription"></p>
+            </div>
+
+            <!-- Answer Review -->
+            <div class="answer-review">
+                <h3>Chi tiết bài làm:</h3>
+                <div id="answerDetails">
+                    <!-- Answer details will be inserted here -->
+                </div>
+            </div>
+
+            <div class="result-actions">
+                <button class="btn-primary" onclick="location.reload()">
+                    <i class="fas fa-redo"></i>
+                    Làm bài mới
+                </button>
+                <button class="btn-secondary" onclick="showHistory()">
+                    <i class="fas fa-history"></i>
+                    Xem lịch sử
+                </button>
+            </div>
+        </section>
+
+        <!-- History Section -->
+        <section id="historySection" class="quiz-section" style="display: none;">
+            <div class="section-header">
+                <h2><i class="fas fa-history"></i> Lịch sử làm bài</h2>
+                <button class="btn-secondary" onclick="backToQuizCreation()">
+                    <i class="fas fa-arrow-left"></i>
+                    Quay lại
+                </button>
+            </div>
+
+            <div id="historyContent" class="history-list">
+                <!-- History items will be inserted here -->
+            </div>
+        </section>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="quiz.js"></script>
+    <script>
+        // Create floating particles effect
+        function createParticles() {
+            const particlesContainer = document.querySelector('.particles');
+            
+            function createParticle() {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // Random size between 3px and 8px
+                const size = Math.random() * 5 + 3;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                
+                // Random horizontal position
+                particle.style.left = Math.random() * 100 + '%';
+                
+                // Random animation duration between 6s and 12s
+                const duration = Math.random() * 6 + 6;
+                particle.style.animationDuration = duration + 's';
+                
+                // Random opacity
+                particle.style.opacity = Math.random() * 0.3 + 0.1;
+                
+                particlesContainer.appendChild(particle);
+                
+                // Remove particle after animation completes
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.parentNode.removeChild(particle);
+                    }
+                }, duration * 1000);
+            }
+            
+            // Create initial particles
+            for (let i = 0; i < 15; i++) {
+                setTimeout(createParticle, i * 200);
+            }
+            
+            // Continue creating particles
+            setInterval(createParticle, 800);
+        }
+        
+        // Start particle effect when page loads
+        document.addEventListener('DOMContentLoaded', createParticles);
+        
+        // Add smooth scroll behavior
+        document.documentElement.style.scrollBehavior = 'smooth';
+        
+        // Add intersection observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animationPlayState = 'running';
+                }
+            });
+        }, observerOptions);
+        
+        // Observe all quiz sections
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('.quiz-section');
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
+</body>
+</html>

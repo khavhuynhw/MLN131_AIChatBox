@@ -6,7 +6,7 @@
 
 $ErrorActionPreference = 'Stop'
 
-# Thiết lập UTF-8 để tránh lỗi phông chữ tiếng Việt trong console
+# Set UTF-8 encoding to avoid Vietnamese font issues in console
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $OutputEncoding = [System.Text.Encoding]::UTF8
 
@@ -31,7 +31,7 @@ function Start-ServiceProc {
     )
 
     if (-not (Test-PortFree -Port $Port)) {
-        Write-Host "Port $Port đang bận, không thể khởi động $Name"
+        Write-Host "Port $Port is busy. Cannot start $Name"
         return $false
     }
 
@@ -40,14 +40,14 @@ function Start-ServiceProc {
     }
 
     $stdout = Join-Path $global:LogsDir $LogFile
-    # stderr khác file với stdout
+    # stderr is written to a different file than stdout
     if ($stdout -match '\.log$') {
         $stderr = ($stdout -replace '\.log$', '.err.log')
     } else {
         $stderr = "$stdout.err"
     }
 
-    # Dùng cmd.exe để redirect 1> stdout và 2> stderr, tránh xung đột RedirectStandard*
+    # Use cmd.exe redirection for stdout and stderr to avoid conflicts
     $p = Start-Process -FilePath $FilePath -ArgumentList $Arguments -WorkingDirectory $WorkingDirectory `
         -NoNewWindow -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
 
@@ -66,18 +66,18 @@ function Wait-ForUrl {
         [int]$DelaySeconds = 2
     )
 
-    Write-Host "Chờ $Name sẵn sàng..."
+    Write-Host "Waiting for $Name to be ready..."
     for ($i = 1; $i -le $MaxAttempts; $i++) {
         try {
             $resp = Invoke-WebRequest -Uri $Url -UseBasicParsing -TimeoutSec 3
-            Write-Host "$Name sẵn sàng"
+            Write-Host "$Name is ready"
             return $true
         } catch {
             Start-Sleep -Seconds $DelaySeconds
         }
     }
 
-    Write-Host "$Name không sẵn sàng trong thời gian chờ"
+    Write-Host "$Name did not become ready in time"
     return $false
 }
 
@@ -89,9 +89,9 @@ $DotnetPort = 9000
 $PythonPort = 8000
 $FrontendPort = 3000
 
-# Prerequisites checks
+# === Prerequisite Checks ===
 if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
-    Write-Error ".NET SDK chưa cài đặt. Vui lòng cài .NET 8 trở lên."
+    Write-Error ".NET SDK is not installed. Please install .NET 8 or later."
     exit 1
 }
 
@@ -104,54 +104,54 @@ if (Test-Path $pythonVenv) {
 } elseif (Get-Command python -ErrorAction SilentlyContinue) {
     $pythonCmd = 'python'
 } else {
-    Write-Error "Python chưa cài đặt. Vui lòng cài Python 3.10+"
+    Write-Error "Python is not installed. Please install Python 3.10 or later."
     exit 1
 }
 
-# PostgreSQL check (optional)
+# --- PostgreSQL check (optional) ---
 try {
     $pg = Test-NetConnection -ComputerName localhost -Port 5432
     if (-not $pg.TcpTestSucceeded) {
-        Write-Host "Cảnh báo: PostgreSQL chưa chạy trên 5432. .NET API vẫn khởi động được nhưng tính năng DB sẽ không hoạt động."
+        Write-Host "⚠️ Warning: PostgreSQL is not running on port 5432. The .NET API will still start, but database features will be unavailable."
     }
 } catch {}
 
-# GEMINI_API_KEY check (optional but recommended)
+# --- GEMINI_API_KEY check (optional but recommended) ---
 $envFile = Join-Path $backendDir '.env'
 if (-not (Test-Path $envFile)) {
-    Write-Host "Cảnh báo: thiếu backend\\.env (GEMINI_API_KEY). Backend Python có thể không khởi động."
+    Write-Host "⚠️ Warning: Missing backend\\.env (GEMINI_API_KEY). The Python backend may fail to start."
 } else {
     $hasKey = Select-String -Path $envFile -Pattern '^GEMINI_API_KEY=' -Quiet
     if (-not $hasKey) {
-        Write-Host "Cảnh báo: backend\\.env thiếu GEMINI_API_KEY."
+        Write-Host "⚠️ Warning: GEMINI_API_KEY not found in backend\\.env."
     }
 }
 
-# 1) Start .NET API
+# --- 1) Start .NET API ---
 $dotnetDir = Join-Path $Root 'dotnet-api\hcm-chatbot-api'
 $dnArgs = @('run','--project','Web_API/Web_API.csproj','--urls',"http://localhost:$DotnetPort")
 $ok = Start-ServiceProc -Name 'NET_API' -FilePath 'dotnet' -Arguments $dnArgs -WorkingDirectory $dotnetDir -Port $DotnetPort -LogFile 'dotnet-api.log'
 if ($ok) { [void](Wait-ForUrl -Name '.NET API' -Url "http://localhost:$DotnetPort/health") }
 
-# 2) Start Python AI Backend
+# --- 2) Start Python AI Backend ---
 $pyArgs = @('-m','uvicorn','app.main:app','--host','0.0.0.0','--port',"$PythonPort")
 $ok = Start-ServiceProc -Name 'PYTHON_AI' -FilePath $pythonCmd -Arguments $pyArgs -WorkingDirectory $backendDir -Port $PythonPort -LogFile 'python-ai.log'
 if ($ok) { [void](Wait-ForUrl -Name 'Python AI' -Url "http://localhost:$PythonPort/health" -MaxAttempts 120 -DelaySeconds 2) }
 
-# 3) Start Frontend static server
+# --- 3) Start Frontend static server ---
 $frontendDir = Join-Path $Root 'frontend'
 $feArgs = @('-m','http.server',"$FrontendPort")
 $ok = Start-ServiceProc -Name 'FRONTEND' -FilePath $pythonCmd -Arguments $feArgs -WorkingDirectory $frontendDir -Port $FrontendPort -LogFile 'frontend.log'
 if ($ok) { [void](Wait-ForUrl -Name 'Frontend' -Url "http://localhost:$FrontendPort") }
 
 Write-Host ""
-Write-Host "Service URLs:"
+Write-Host "=== Service URLs ==="
 Write-Host "Frontend:    http://localhost:$FrontendPort/index.html"
 Write-Host ".NET API:    http://localhost:$DotnetPort/swagger"
 Write-Host "Python API:  http://localhost:$PythonPort/docs"
 
 Write-Host ""
-Write-Host "Admin mặc định (nếu DB rỗng):"
+Write-Host "Default Admin (if database is empty):"
 Write-Host "Username: admin"
 Write-Host "Password: admin123"
 

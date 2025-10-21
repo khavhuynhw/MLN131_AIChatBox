@@ -971,9 +971,8 @@
             // Show loading
             showLoading();
             updateLoadingText('Rồng thần đang thức tỉnh...', 'Đang xác thực thông tin đăng nhập...');
-            
             try {
-                const API_BASE = window.NODEJS_API || 'http://localhost:8001';
+                const API_BASE = window.NODEJS_API || 'http://localhost:9000/api';
                 const response = await fetch(`${API_BASE}/auth/login`, {
                     method: 'POST',
                     headers: {
@@ -984,10 +983,16 @@
 
                 const result = await response.json();
 
-                if (response.ok) {
+                const payload = result.data || {};
+
+                if (response.ok && result.success && payload.token && payload.user) {
+                    // Reset previous session data to avoid stale values
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+
                     // Save token and user info
-                    localStorage.setItem('token', result.token);
-                    localStorage.setItem('user', JSON.stringify(result.user));
+                    localStorage.setItem('token', payload.token);
+                    localStorage.setItem('user', JSON.stringify(payload.user));
                     
                     updateLoadingText('Đăng nhập thành công!', 'Rồng thần đang dẫn bạn vào thế giới tri thức...');
                     
@@ -1031,7 +1036,7 @@
             updateLoadingText('Rồng thần đang nhận diện...', 'Đang tạo tài khoản mới...');
             
             try {
-                const API_BASE = window.NODEJS_API || 'http://localhost:8001';
+                const API_BASE = window.NODEJS_API || 'http://localhost:9000/api';
                 const response = await fetch(`${API_BASE}/auth/register`, {
                     method: 'POST',
                     headers: {
@@ -1041,11 +1046,16 @@
                 });
 
                 const result = await response.json();
+                const payload = result.data || {};
 
-                if (response.ok) {
+                if (response.ok && result.success && payload.token && payload.user) {
+                    // Reset previous session data to avoid stale values
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+
                     // Save token and user info
-                    localStorage.setItem('token', result.token);
-                    localStorage.setItem('user', JSON.stringify(result.user));
+                    localStorage.setItem('token', payload.token);
+                    localStorage.setItem('user', JSON.stringify(payload.user));
                     
                     updateLoadingText('Chào mừng chiến binh tri thức!', 'Rồng thần sẽ dẫn bạn khám phá tư tưởng Hồ Chí Minh...');
                     

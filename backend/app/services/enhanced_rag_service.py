@@ -9,8 +9,12 @@ from typing import List
 from urllib.parse import quote
 import unicodedata
 import re
+from pathlib import Path
 
-load_dotenv()
+_BACKEND_DIR = Path(__file__).resolve().parents[2]
+env_loaded = load_dotenv(_BACKEND_DIR / ".env")
+if not env_loaded:
+    load_dotenv(_BACKEND_DIR.parent / ".env")
 
 class EnhancedRAGService:
     def __init__(self):

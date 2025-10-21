@@ -2427,7 +2427,7 @@
                 if (!email || !fullName) { alert('Vui lòng điền đầy đủ thông tin!'); return; }
                 const token = localStorage.getItem('token');
                 if (!token) { alert('Không tìm thấy token. Vui lòng đăng nhập lại!'); return; }
-                const res = await fetch((window.NODEJS_API || window.API_BASE_URL || 'https://hcm-chatbot-nodejs-api.fly.dev') + '/auth/profile', {
+                const res = await fetch((window.NODEJS_API || window.API_BASE_URL || 'http://localhost:9000/api') + '/auth/profile', {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
                     body: JSON.stringify({ email, fullName })
@@ -2460,7 +2460,7 @@
                 if (newPassword.length < 6) { alert('Mật khẩu mới phải có ít nhất 6 ký tự!'); return; }
                 const token = localStorage.getItem('token');
                 if (!token) { alert('Không tìm thấy token. Vui lòng đăng nhập lại!'); return; }
-                const res = await fetch((window.NODEJS_API || window.API_BASE_URL || 'https://hcm-chatbot-nodejs-api.fly.dev') + '/auth/change-password', {
+                const res = await fetch((window.NODEJS_API || window.API_BASE_URL || 'http://localhost:9000/api') + '/auth/change-password', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
                     body: JSON.stringify({ currentPassword, newPassword })

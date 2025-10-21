@@ -250,6 +250,6 @@ async function loadPage(slug, opts={}){
     });
   }catch(err){
     console.error(err);
-    document.getElementById('content').innerHTML = '<p>Lỗi tải nội dung. Hãy kiểm tra backend (cổng 8000).</p>';
+    document.getElementById('content').innerHTML = '<p>Lỗi tải nội dung. Hãy kiểm tra backend (cổng 9000).</p>';
   }
 })();

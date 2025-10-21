@@ -6,7 +6,7 @@
 class AdminDashboard {
     constructor() {
         // ===== CẤU HÌNH API =====
-        this.API_BASE = window.NODEJS_API || window.API_BASE_URL || 'http://localhost:8001';
+        this.API_BASE = window.NODEJS_API || window.API_BASE_URL || 'http://localhost:9000/api';
 
         // ===== STATE MANAGEMENT =====
         this.user = null;

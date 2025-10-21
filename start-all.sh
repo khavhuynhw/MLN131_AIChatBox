@@ -79,7 +79,7 @@ if ! command -v dotnet &> /dev/null; then
 fi
 
 # Check if Python is installed
-if ! command -v python3 &> /dev/null; then
+if ! command -v python3 &> /dev/null && ! command -v python &> /dev/null; then
     echo "❌ Python 3 is not installed. Please install Python 3.8 or later."
     exit 1
 fi
@@ -125,7 +125,7 @@ else
 fi
 
 # 3. Start Frontend
-if start_service "FRONTEND" "cd frontend && python3 -m http.server 3000" 3000 "frontend.log"; then
+if start_service "FRONTEND" "cd frontend && python -m http.server 3000" 3000 "frontend.log"; then
     sleep 3
     if wait_for_service "Frontend" "http://localhost:3000"; then
         echo ""

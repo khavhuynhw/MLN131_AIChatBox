@@ -76,7 +76,7 @@ function linkInlineCitations(renderedHtml, citationMap, sources){
 class HCMChatApp {
     constructor() {
         // ===== CẤU HÌNH API =====
-        this.API_BASE = window.NODEJS_API || window.API_BASE_URL || 'http://localhost:8001';
+        this.API_BASE = window.NODEJS_API || window.API_BASE_URL || 'http://localhost:9000/api';
 
         // ===== STATE MANAGEMENT =====
         this.currentConversationId = null; // ID cuộc trò chuyện hiện tại
@@ -97,8 +97,13 @@ class HCMChatApp {
         this.token = localStorage.getItem('token'); // Lấy token từ localStorage
         const userStr = localStorage.getItem('user'); // Lấy thông tin user
 
-        // Nếu chưa đăng nhập, chuyển về trang auth
-        if (!this.token || !userStr) {
+        const tokenMissing = !this.token || this.token === 'undefined' || this.token === 'null';
+        const userMissing = !userStr || userStr === 'undefined' || userStr === 'null';
+
+        // Nếu chưa đăng nhập hoặc dữ liệu không hợp lệ, chuyển về trang auth
+        if (tokenMissing || userMissing) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
             window.location.href = 'auth.html';
             return;
         }
@@ -464,9 +469,10 @@ class HCMChatApp {
     async loadConversations() {
         try {
             const response = await this.fetchWithAuth('/conversations');
-            if (response.ok) {
+            if (response && response.ok) {
                 const data = await response.json();
-                this.conversations = data.conversations || [];
+                const payload = data.data || data.conversations || [];
+                this.conversations = Array.isArray(payload) ? payload : [];
                 
                 // Debug: Log để kiểm tra cấu trúc dữ liệu conversations từ API
                 if (this.conversations.length > 0) {
@@ -547,9 +553,10 @@ class HCMChatApp {
     async loadMessages(conversationId) {
         try {
             const response = await this.fetchWithAuth(`/conversations/${conversationId}/messages`);
-            if (response.ok) {
+            if (response && response.ok) {
                 const data = await response.json();
-                const messages = data.messages || [];
+                const payload = data.data || data.messages || [];
+                const messages = Array.isArray(payload) ? payload : [];
                 
                 // Debug: Log để kiểm tra cấu trúc dữ liệu từ API
                 if (messages.length > 0) {

@@ -1,12 +1,14 @@
 """
-PYTHON AI BACKEND - HCM THOUGHT CHATBOT
+PYTHON AI BACKEND - MLN131 CHATBOT - CHƯƠNG 03
 Sử dụng FastAPI để tạo REST API cho AI chatbot
 Tích hợp RAG (Retrieval-Augmented Generation) với Gemini AI
+Tập trung vào nội dung Chương 03: Chủ nghĩa xã hội và thời kỳ quá độ lên chủ nghĩa xã hội
 """
 
 # Import các thư viện cần thiết
 from fastapi import FastAPI, HTTPException
 import os
+from dotenv import load_dotenv
 from typing import List, Dict, Any, Optional
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -16,8 +18,17 @@ import google.generativeai as genai
 import json
 import requests
 
+
+
+load_dotenv()
+api_key = os.getenv("GEMINI_API_KEY")
+
+if not api_key:
+    raise RuntimeError("⚠️ Không tìm thấy GEMINI_API_KEY — hãy kiểm tra file .env hoặc biến môi trường.")
+
+
 # ===== KHỞI TẠO FASTAPI APPLICATION =====
-app = FastAPI(title="Enhanced HCM Thought Chatbot API", version="2.0.0")
+app = FastAPI(title="MLN131 Chatbot - Chương 03 API", version="2.0.0")
 
 # ===== CẤU HÌNH CORS =====
 # Cho phép .NET API (localhost:9000) gọi Python API này
@@ -71,36 +82,47 @@ class QuizResultResponse(BaseModel):
 
 # ===== LIFECYCLE EVENTS =====
 
+async def background_load_knowledge_base():
+    """Load knowledge base in the background without blocking startup"""
+    try:
+        print("📚 Loading knowledge base in background...")
+        rag_service.update_knowledge_base(force_update=True)
+        print("✅ Knowledge base loaded successfully!")
+    except Exception as e:
+        print(f"⚠️ Warning: RAG service init failed: {e}")
+
 @app.on_event("startup")
 async def startup_event():
     """
     Khởi tạo knowledge base khi server start
-    Tải và xử lý tất cả tài liệu về tư tưởng Hồ Chí Minh
+    Tải và xử lý tất cả tài liệu về Chủ nghĩa xã hội và thời kỳ quá độ
     """
-    print("🚀 Starting Enhanced HCM Chatbot API...")
+    print("🚀 Starting MLN131 Chatbot API...")
     print("📋 Available endpoints:")
     for route in app.routes:
         if hasattr(route, 'methods') and hasattr(route, 'path'):
             print(f"  {list(route.methods)} {route.path}")
     
-    try:
-        rag_service.update_knowledge_base(force_update=True)
-        print("✅ Enhanced Server ready!")
-    except Exception as e:
-        print(f"⚠️ Warning: RAG service init failed: {e}")
-        print("✅ Server ready (RAG disabled)!")
+    # Load knowledge base in background to speed up startup
+    import asyncio
+    asyncio.create_task(background_load_knowledge_base())
+    print("✅ Server ready! Knowledge base loading in background...")
 
 # ===== API ENDPOINTS =====
 
 @app.get("/")
 async def root():
     """Root endpoint - thông tin cơ bản về API"""
-    return {"message": "Enhanced HCM Thought Chatbot API", "version": "2.0.0", "status": "running"}
+    return {"message": "MLN131 Chatbot - Chương 03 API", "version": "2.0.0", "status": "running"}
 
 @app.get("/health")
 async def health_check():
     """Health check endpoint - kiểm tra tình trạng AI service"""
-    stats = rag_service.get_stats()
+    try:
+        stats = rag_service.get_stats()
+    except:
+        # If stats fail, still return healthy (knowledge base might still be loading)
+        stats = {"status": "initializing"}
     return {"status": "healthy", "stats": stats}
 
 # ===== ADMIN ENDPOINTS =====
@@ -158,21 +180,21 @@ async def enhanced_chat(request: QuestionRequest):
 
             # Prompt template cho fallback response
             prompt = f"""
-            Câu hỏi về tư tưởng Hồ Chí Minh: {request.question}
+            Câu hỏi về Chủ nghĩa xã hội và thời kỳ quá độ: {request.question}
 
-            Hãy trả lời dựa trên kiến thức về tư tưởng Hồ Chí Minh, bao gồm:
-            - Độc lập dân tộc
-            - Chủ nghĩa xã hội
-            - Đạo đức cách mạng
-            - Dân chủ
-            - Đoàn kết dân tộc
+            Hãy trả lời dựa trên kiến thức về Chủ nghĩa xã hội và thời kỳ quá độ, bao gồm:
+            - Khái niệm chủ nghĩa xã hội
+            - Thời kỳ quá độ lên chủ nghĩa xã hội
+            - Đặc trưng bản chất của chủ nghĩa xã hội
+            - Điều kiện ra đời của chủ nghĩa xã hội
+            - Vận dụng ở Việt Nam
             """
 
             response = model.generate_content(prompt)
 
             return EnhancedChatResponse(
                 answer=response.text,
-                sources=["Kiến thức chung về tư tưởng Hồ Chí Minh"],  # Nguồn generic
+                sources=["Kiến thức chung về Chủ nghĩa xã hội và thời kỳ quá độ"],  # Nguồn generic
                 confidence=75,  # Độ tin cậy thấp hơn vì không có RAG
                 last_updated="2024-01-01"
             )
@@ -187,7 +209,7 @@ BOOK_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data",
 def _slug_to_title(slug: str) -> str:
     s = slug.lower()
     mapping = {
-        'tu-tuong-ho-chi-minh': 'Tư tưởng Hồ Chí Minh',
+        'tu-tuong-ho-chi-minh': 'Chủ nghĩa xã hội và thời kỳ quá độ',
         'muc-luc': 'Mục lục',
         'chuong1': 'Chương I',
         'chuong2': 'Chương II',
@@ -283,7 +305,7 @@ async def generate_quiz(request: QuizGenerateRequest):
         
         # Prompt để tạo câu hỏi
         prompt = f"""
-        Tạo {request.num_questions} câu hỏi trắc nghiệm về tư tưởng Hồ Chí Minh {request.chapter}.
+        Tạo {request.num_questions} câu hỏi trắc nghiệm về Chủ nghĩa xã hội và thời kỳ quá độ {request.chapter}.
         Độ khó: {request.difficulty}
         
         Yêu cầu:
@@ -358,9 +380,18 @@ async def generate_quiz(request: QuizGenerateRequest):
 
 @app.post("/images/search")
 async def search_images(request: ImageSearchRequest):
-    """Tìm ảnh sử dụng Google Custom Search API - chỉ từ các trang báo VN"""
-    print(f"🖼️ Image search request: query='{request.query}', num_results={request.num_results}")
+    """Tìm ảnh - DISABLED để tránh external API calls"""
+    print(f"🖼️ Image search request DISABLED: query='{request.query}', num_results={request.num_results}")
     
+    # Return empty results to prevent external API calls
+    return {
+        "images": [],
+        "total_results": 0,
+        "message": "Image search disabled to prevent external API calls"
+    }
+    
+    # DISABLED CODE BELOW - External API calls removed
+    """
     try:
         print("🔧 Step 1: Checking API keys...")
         api_key = os.getenv("GOOGLE_CSE_API_KEY")
@@ -379,7 +410,7 @@ async def search_images(request: ImageSearchRequest):
         params = {
             'key': api_key,
             'cx': cse_id,
-            'q': f"Hồ Chí Minh {request.query}",
+            'q': f"Chủ nghĩa xã hội {request.query}",
             'searchType': 'image',
             'num': min(request.num_results, 10),
             'safe': 'active',
@@ -427,6 +458,7 @@ async def search_images(request: ImageSearchRequest):
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Lỗi tìm ảnh: {str(e)}")
+    """
 
 @app.get("/quiz/{quiz_id}")
 async def get_quiz(quiz_id: str):

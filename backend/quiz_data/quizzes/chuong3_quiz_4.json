@@ -1,0 +1,72 @@
+{
+  "id": "chuong3_quiz_4",
+  "title": "Sự vận dụng sáng tạo của Đảng Cộng sản Việt Nam",
+  "chapter": "Chương III",
+  "difficulty": "hard",
+  "description": "Kiểm tra kiến thức về sự vận dụng sáng tạo của Đảng Cộng sản Việt Nam về chủ nghĩa xã hội và thời kỳ quá độ",
+  "questions": [
+    {
+      "id": "q1",
+      "question": "Mục tiêu tổng quát của chủ nghĩa xã hội ở Việt Nam là gì?",
+      "options": [
+        "Dân giàu, nước mạnh, dân chủ, công bằng, văn minh",
+        "Độc lập, tự do, hạnh phúc",
+        "Công nghiệp hóa, hiện đại hóa",
+        "Hội nhập quốc tế"
+      ],
+      "correct_answer": 0,
+      "explanation": "Theo Cương lĩnh xây dựng đất nước trong thời kỳ quá độ lên chủ nghĩa xã hội (bổ sung, phát triển năm 2011), mục tiêu của chủ nghĩa xã hội ở Việt Nam là: 'Dân giàu, nước mạnh, dân chủ, công bằng, văn minh.'"
+    },
+    {
+      "id": "q2",
+      "question": "Việt Nam quá độ lên chủ nghĩa xã hội theo con đường nào?",
+      "options": [
+        "Con đường quá độ trực tiếp",
+        "Con đường quá độ gián tiếp (bỏ qua chế độ tư bản chủ nghĩa)",
+        "Con đường quá độ hỗn hợp",
+        "Con đường quá độ từng bước"
+      ],
+      "correct_answer": 1,
+      "explanation": "Việt Nam quá độ lên chủ nghĩa xã hội bỏ qua chế độ tư bản chủ nghĩa. Đây là con đường quá độ gián tiếp, nghĩa là không trải qua giai đoạn phát triển đầy đủ của chủ nghĩa tư bản, nhưng tiếp thu có chọn lọc những thành tựu văn minh nhân loại."
+    },
+    {
+      "id": "q3",
+      "question": "Đặc điểm của thời kỳ quá độ ở Việt Nam là gì?",
+      "options": [
+        "Ngắn hạn và đơn giản",
+        "Lâu dài, phức tạp, nhiều bước phát triển đan xen",
+        "Trung hạn và ổn định",
+        "Dài hạn nhưng đơn giản"
+      ],
+      "correct_answer": 1,
+      "explanation": "Do đó, thời kỳ quá độ ở Việt Nam mang tính chất lâu dài, phức tạp, nhiều bước phát triển đan xen, trong đó yếu tố xã hội cũ và mới cùng tồn tại, đấu tranh và chuyển hóa lẫn nhau."
+    },
+    {
+      "id": "q4",
+      "question": "Việt Nam quá độ lên chủ nghĩa xã hội trong bối cảnh nào?",
+      "options": [
+        "Bối cảnh chiến tranh lạnh",
+        "Bối cảnh hội nhập quốc tế sâu rộng",
+        "Bối cảnh cô lập quốc tế",
+        "Bối cảnh phát triển nội địa"
+      ],
+      "correct_answer": 1,
+      "explanation": "Việt Nam quá độ lên chủ nghĩa xã hội trong bối cảnh toàn cầu hóa, kinh tế tri thức và cuộc Cách mạng công nghiệp 4.0. Do đó, phải vừa xây dựng chủ nghĩa xã hội, vừa chủ động hội nhập quốc tế, vừa bảo vệ độc lập, chủ quyền dân tộc."
+    },
+    {
+      "id": "q5",
+      "question": "Đại hội XIII của Đảng (2021) xác định bao nhiêu phương hướng lớn để xây dựng chủ nghĩa xã hội?",
+      "options": [
+        "6 phương hướng",
+        "7 phương hướng",
+        "8 phương hướng",
+        "9 phương hướng"
+      ],
+      "correct_answer": 2,
+      "explanation": "Đại hội XIII của Đảng (2021) xác định 8 phương hướng lớn để xây dựng chủ nghĩa xã hội trong giai đoạn mới, tiêu biểu là: kiên định con đường xã hội chủ nghĩa, xây dựng Đảng trong sạch vững mạnh, phát triển kinh tế thị trường định hướng xã hội chủ nghĩa, v.v."
+    }
+  ],
+  "created_at": "2024-10-21T20:00:00Z",
+  "time_limit": 300
+}
+

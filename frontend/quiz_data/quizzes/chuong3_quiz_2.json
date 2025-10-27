@@ -1,0 +1,71 @@
+{
+  "id": "chuong3_quiz_2",
+  "title": "Điều kiện ra đời và đặc trưng của chủ nghĩa xã hội",
+  "chapter": "Chương III",
+  "difficulty": "medium",
+  "description": "Kiểm tra kiến thức về điều kiện ra đời và các đặc trưng bản chất của chủ nghĩa xã hội",
+  "questions": [
+    {
+      "id": "q1",
+      "question": "Theo chủ nghĩa Mác - Lênin, sự ra đời của chủ nghĩa xã hội có bao nhiêu điều kiện cơ bản?",
+      "options": [
+        "1 điều kiện",
+        "2 điều kiện",
+        "3 điều kiện", 
+        "4 điều kiện"
+      ],
+      "correct_answer": 1,
+      "explanation": "Theo chủ nghĩa Mác - Lênin, sự ra đời của chủ nghĩa xã hội là kết quả tất yếu của sự phát triển lịch sử, với hai điều kiện cơ bản: điều kiện kinh tế và điều kiện chính trị - xã hội."
+    },
+    {
+      "id": "q2",
+      "question": "Mâu thuẫn cơ bản trong chủ nghĩa tư bản là gì?",
+      "options": [
+        "Mâu thuẫn giữa giai cấp tư sản và giai cấp nông dân",
+        "Mâu thuẫn giữa tính xã hội hóa của sản xuất và chế độ chiếm hữu tư nhân tư bản chủ nghĩa",
+        "Mâu thuẫn giữa giai cấp công nhân và giai cấp trí thức",
+        "Mâu thuẫn giữa thành thị và nông thôn"
+      ],
+      "correct_answer": 1,
+      "explanation": "Mâu thuẫn giữa tính xã hội hóa của sản xuất và chế độ chiếm hữu tư nhân tư bản chủ nghĩa ngày càng gay gắt, khiến cách mạng xã hội chủ nghĩa trở thành tất yếu khách quan."
+    },
+    {
+      "id": "q3",
+      "question": "Cách mạng vô sản có thể diễn ra bằng những hình thức nào?",
+      "options": [
+        "Chỉ bằng bạo lực cách mạng",
+        "Chỉ bằng con đường hòa bình",
+        "Bằng bạo lực cách mạng hoặc con đường hòa bình",
+        "Bằng cách mạng văn hóa"
+      ],
+      "correct_answer": 2,
+      "explanation": "Cách mạng vô sản có thể diễn ra bằng bạo lực cách mạng hoặc con đường hòa bình, song trên thực tế, bạo lực là hình thức chủ yếu do sự chống đối quyết liệt của giai cấp tư sản."
+    },
+    {
+      "id": "q4",
+      "question": "Theo C. Mác và Ph. Ăngghen, điều kiện cho sự phát triển tự do của tất cả mọi người là gì?",
+      "options": [
+        "Sự phát triển tự do của giai cấp tư sản",
+        "Sự phát triển tự do của mỗi người",
+        "Sự phát triển tự do của giai cấp công nhân",
+        "Sự phát triển tự do của nhà nước"
+      ],
+      "correct_answer": 1,
+      "explanation": "C. Mác và Ph. Ăngghen khẳng định: 'Sự phát triển tự do của mỗi người là điều kiện cho sự phát triển tự do của tất cả mọi người.'"
+    },
+    {
+      "id": "q5",
+      "question": "V.I. Lênin nhấn mạnh rằng từ chủ nghĩa tư bản, nhân loại chỉ có thể tiến lên gì?",
+      "options": [
+        "Chủ nghĩa phong kiến",
+        "Chủ nghĩa xã hội",
+        "Chủ nghĩa tư bản độc quyền",
+        "Chủ nghĩa đế quốc"
+      ],
+      "correct_answer": 1,
+      "explanation": "V.I. Lênin nhấn mạnh: 'Từ chủ nghĩa tư bản, nhân loại chỉ có thể tiến lên chủ nghĩa xã hội, nghĩa là lên chế độ công hữu về các tư liệu sản xuất và chế độ phân phối sản phẩm theo lao động của mỗi người.'"
+    }
+  ],
+  "created_at": "2024-10-21T20:00:00Z",
+  "time_limit": 300
+}

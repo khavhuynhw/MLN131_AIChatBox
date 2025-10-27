@@ -2,12 +2,8 @@ import google.generativeai as genai
 from .vector_store import SimpleVectorStore
 import os
 from dotenv import load_dotenv
-from pathlib import Path
 
-_BACKEND_DIR = Path(__file__).resolve().parents[2]
-env_loaded = load_dotenv(_BACKEND_DIR / ".env")
-if not env_loaded:
-    load_dotenv(_BACKEND_DIR.parent / ".env")
+load_dotenv()
 
 class RAGService:
     def __init__(self):
@@ -21,7 +17,7 @@ class RAGService:
         print("RAG Service đã sẵn sàng!")
     
     def add_hcm_documents(self):
-        """Thêm documents mẫu về tư tưởng HCM (chỉ nếu chưa có đủ)"""
+        """Thêm documents mẫu về Chủ nghĩa xã hội và thời kỳ quá độ (chỉ nếu chưa có đủ)"""
         if self.vector_store.get_collection_count() >= 10:
             print("Documents đã có sẵn, bỏ qua việc thêm mới")
             return
@@ -53,7 +49,7 @@ class RAGService:
         ]
         
         self.vector_store.add_documents(sample_docs, sample_metadata)
-        print(f"Đã thêm {len(sample_docs)} documents về tư tưởng HCM")
+        print(f"Đã thêm {len(sample_docs)} documents về Chủ nghĩa xã hội và thời kỳ quá độ")
     
     def generate_response(self, question: str):
         """Sinh trả lời dựa trên RAG"""
@@ -62,14 +58,14 @@ class RAGService:
             search_results = self.vector_store.search(question, n_results=3)
             
             if not search_results['documents'][0]:
-                return "Xin lỗi, tôi không tìm thấy thông tin liên quan trong cơ sở tri thức về tư tưởng Hồ Chí Minh."
+                return "Xin lỗi, tôi không tìm thấy thông tin liên quan trong cơ sở tri thức về Chủ nghĩa xã hội và thời kỳ quá độ."
             
             # 2. Augment: Tạo context từ documents
             context_docs = search_results['documents'][0]
             context = "\n".join([f"- {doc}" for doc in context_docs[:3]])
             
             # 3. Generate: Tạo prompt cho Gemini
-            prompt = f"""Bạn là một chuyên gia về tư tưởng Hồ Chí Minh. Hãy trả lời câu hỏi dựa trên các tài liệu sau:
+            prompt = f"""Bạn là một chuyên gia về Chủ nghĩa xã hội và thời kỳ quá độ lên chủ nghĩa xã hội. Hãy trả lời câu hỏi dựa trên các tài liệu sau:
 
 NGUYÊN LIỆU THAM KHẢO:
 {context}
@@ -77,10 +73,10 @@ NGUYÊN LIỆU THAM KHẢO:
 CÂUHỎI: {question}
 
 YÊU CẦU:
-- Trả lời dựa trên nội dung tư tưởng Hồ Chí Minh được cung cấp
+- Trả lời dựa trên nội dung Chủ nghĩa xã hội và thời kỳ quá độ được cung cấp
 - Giải thích rõ ràng, dễ hiểu
 - Có thể trích dẫn trực tiếp từ tài liệu nếu phù hợp
-- Nếu câu hỏi không liên quan đến tư tưởng HCM, hãy định hướng về chủ đề này
+- Nếu câu hỏi không liên quan đến Chủ nghĩa xã hội và thời kỳ quá độ, hãy định hướng về chủ đề này
 - Trả lời bằng tiếng Việt, tối đa 3 đoạn văn
 
 TRẢ LỜI:"""

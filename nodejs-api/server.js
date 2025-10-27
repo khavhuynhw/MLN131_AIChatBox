@@ -48,7 +48,7 @@ const logger = require('./utils/logger');
 const { Database } = require('./models/database');
 
 const app = express();
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 8001;
 
 // ===== SECURITY MIDDLEWARE =====
 app.use(helmet({

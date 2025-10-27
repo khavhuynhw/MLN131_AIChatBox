@@ -1,0 +1,72 @@
+{
+  "id": "chuong3_quiz_3",
+  "title": "Thời kỳ quá độ lên chủ nghĩa xã hội",
+  "chapter": "Chương III",
+  "difficulty": "medium",
+  "description": "Kiểm tra kiến thức về thời kỳ quá độ lên chủ nghĩa xã hội và đặc điểm của nó",
+  "questions": [
+    {
+      "id": "q1",
+      "question": "Thời kỳ quá độ lên chủ nghĩa xã hội là thời kỳ lịch sử nằm giữa những gì?",
+      "options": [
+        "Giữa xã hội phong kiến và xã hội tư bản chủ nghĩa",
+        "Giữa xã hội tư bản chủ nghĩa và xã hội cộng sản chủ nghĩa",
+        "Giữa xã hội nô lệ và xã hội phong kiến",
+        "Giữa xã hội nguyên thủy và xã hội nô lệ"
+      ],
+      "correct_answer": 1,
+      "explanation": "Thời kỳ quá độ lên chủ nghĩa xã hội là thời kỳ lịch sử tất yếu, nằm giữa xã hội tư bản chủ nghĩa và xã hội cộng sản chủ nghĩa."
+    },
+    {
+      "id": "q2",
+      "question": "V.I. Lênin khẳng định rằng thời kỳ quá độ từ chủ nghĩa tư bản lên chủ nghĩa xã hội là gì?",
+      "options": [
+        "Thời kỳ hòa bình và ổn định",
+        "Thời kỳ đấu tranh quyết liệt giữa chủ nghĩa tư bản đang hấp hối và chủ nghĩa xã hội đang nảy sinh",
+        "Thời kỳ phát triển kinh tế thuần túy",
+        "Thời kỳ cách mạng văn hóa"
+      ],
+      "correct_answer": 1,
+      "explanation": "V.I. Lênin khẳng định: 'Thời kỳ quá độ từ chủ nghĩa tư bản lên chủ nghĩa xã hội là thời kỳ đấu tranh quyết liệt giữa chủ nghĩa tư bản đang hấp hối và chủ nghĩa xã hội đang nảy sinh.'"
+    },
+    {
+      "id": "q3",
+      "question": "Trong thời kỳ quá độ, tồn tại đan xen những yếu tố nào?",
+      "options": [
+        "Chỉ có yếu tố cũ",
+        "Chỉ có yếu tố mới",
+        "Hai yếu tố cũ - mới",
+        "Ba yếu tố cũ - mới - trung gian"
+      ],
+      "correct_answer": 2,
+      "explanation": "Thời kỳ quá độ là giai đoạn phức tạp và kéo dài, tồn tại đan xen hai yếu tố cũ - mới: còn tàn dư của chủ nghĩa tư bản và đồng thời hình thành những nhân tố xã hội chủ nghĩa."
+    },
+    {
+      "id": "q4",
+      "question": "Trong thời kỳ quá độ, cuộc đấu tranh giai cấp diễn ra giữa những lực lượng nào?",
+      "options": [
+        "Giữa giai cấp tư sản và giai cấp nông dân",
+        "Giữa giai cấp công nhân và nhân dân lao động với các giai cấp phản động, bảo thủ",
+        "Giữa giai cấp trí thức và giai cấp công nhân",
+        "Giữa thành thị và nông thôn"
+      ],
+      "correct_answer": 1,
+      "explanation": "Trong thời kỳ quá độ diễn ra cuộc đấu tranh giai cấp gay gắt giữa giai cấp công nhân và nhân dân lao động với các giai cấp phản động, bảo thủ muốn khôi phục chế độ cũ."
+    },
+    {
+      "id": "q5",
+      "question": "Thành công của thời kỳ quá độ phụ thuộc vào những yếu tố nào?",
+      "options": [
+        "Chỉ phụ thuộc vào trình độ phát triển kinh tế",
+        "Chỉ phụ thuộc vào vai trò lãnh đạo của Đảng Cộng sản",
+        "Phụ thuộc vào trình độ phát triển kinh tế - xã hội, vai trò lãnh đạo của Đảng Cộng sản, sự tham gia tích cực của nhân dân lao động và đường lối đúng đắn",
+        "Chỉ phụ thuộc vào sự tham gia của nhân dân"
+      ],
+      "correct_answer": 2,
+      "explanation": "Thành công của thời kỳ quá độ phụ thuộc vào: trình độ phát triển kinh tế - xã hội; vai trò lãnh đạo của Đảng Cộng sản; sự tham gia tích cực, tự giác của nhân dân lao động; và đường lối đúng đắn trong xây dựng chủ nghĩa xã hội."
+    }
+  ],
+  "created_at": "2024-10-21T20:00:00Z",
+  "time_limit": 300
+}
+

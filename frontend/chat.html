@@ -1,9 +1,14 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" xml:lang="vi">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="Content-Language" content="vi">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HCM Chatbot - Chat</title>
+    <title>MLN131 Chatbot - Chủ Nghĩa Xã Hội Và Thời Kỳ Quá Độ - Chat</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="global-styles.css">
     <script src="config.js"></script>
@@ -2111,7 +2116,7 @@
                 <div class="logo-icon">
                     <i class="fas fa-star"></i>
                 </div>
-                <span class="logo-text">HCM Chatbot</span>
+                <span class="logo-text">MLN131 Chatbot</span>
             </div>
             <div class="user-info">
                 <div class="user-avatar">
@@ -2139,7 +2144,7 @@
 
         <div class="sidebar-footer">
             <button class="quiz-btn" onclick="window.location.href='quiz.html'" style="width: 100%; margin-bottom: 10px; padding: 12px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: all 0.3s;">
-                <i class="fas fa-graduation-cap"></i> <span>Kiểm tra kiến thức</span>
+                <i class="fas fa-graduation-cap"></i> <span>Đánh giá kiến thức</span>
             </button>
             <button class="logout-btn" onclick="logout()">
                 <i class="fas fa-sign-out-alt"></i> <span>Đăng xuất</span>
@@ -2156,7 +2161,7 @@
                 </button>
                 <div class="chat-title">
                     <span class="vietnam-flag">🇻🇳</span>
-                    <span>Chatbot Tư Tưởng Hồ Chí Minh</span>
+                    <span>Chatbot Chủ Nghĩa Xã Hội Và Thời Kỳ Quá Độ</span>
                 </div>
             </div>
             <div class="header-actions">
@@ -2193,8 +2198,8 @@
 
             <div class="empty-state" id="emptyState">
                 <i class="fas fa-comments"></i>
-                <h3>Chào mừng đến với HCM Chatbot!</h3>
-                <p>Hãy bắt đầu cuộc trò chuyện về tư tưởng Hồ Chí Minh</p>
+                <h3>Chào mừng đến với MLN131 Chatbot!</h3>
+                <p>Hãy bắt đầu học tập về Chủ nghĩa xã hội và thời kỳ quá độ</p>
 
             </div>
         </div>
@@ -2210,7 +2215,7 @@
                         <textarea
                             id="messageInput"
                             class="chat-input"
-                            placeholder="Hỏi bất kỳ điều gì"
+                            placeholder="Hỏi về Chủ nghĩa xã hội và thời kỳ quá độ"
                             rows="1"
                         ></textarea>
                     </div>
@@ -2244,7 +2249,7 @@
                             <i class="fas fa-question-circle"></i>
                             <div class="item-content">
                                 <span class="item-title">Tạo bài kiểm tra</span>
-                                <span class="item-desc">Tạo câu hỏi trắc nghiệm</span>
+                                <span class="item-desc">Tạo câu hỏi về Chủ nghĩa xã hội</span>
                             </div>
                         </div>
                     </div>
@@ -2427,7 +2432,7 @@
                 if (!email || !fullName) { alert('Vui lòng điền đầy đủ thông tin!'); return; }
                 const token = localStorage.getItem('token');
                 if (!token) { alert('Không tìm thấy token. Vui lòng đăng nhập lại!'); return; }
-                const res = await fetch((window.NODEJS_API || window.API_BASE_URL || 'http://localhost:9000/api') + '/auth/profile', {
+                const res = await fetch((window.NODEJS_API || window.API_BASE_URL || 'https://hcm-chatbot-nodejs-api.fly.dev') + '/auth/profile', {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
                     body: JSON.stringify({ email, fullName })
@@ -2460,7 +2465,7 @@
                 if (newPassword.length < 6) { alert('Mật khẩu mới phải có ít nhất 6 ký tự!'); return; }
                 const token = localStorage.getItem('token');
                 if (!token) { alert('Không tìm thấy token. Vui lòng đăng nhập lại!'); return; }
-                const res = await fetch((window.NODEJS_API || window.API_BASE_URL || 'http://localhost:9000/api') + '/auth/change-password', {
+                const res = await fetch((window.NODEJS_API || window.API_BASE_URL || 'https://hcm-chatbot-nodejs-api.fly.dev') + '/auth/change-password', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
                     body: JSON.stringify({ currentPassword, newPassword })

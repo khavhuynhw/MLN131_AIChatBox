@@ -6,33 +6,8 @@ import unicodedata
 import google.generativeai as genai
 from dotenv import load_dotenv
 from typing import List, Dict
-from pathlib import Path
-import sys
 
-_BACKEND_DIR = Path(__file__).resolve().parents[2]
-
-# Ensure environment variables are loaded even when running uvicorn from repo root
-env_loaded = load_dotenv(_BACKEND_DIR / ".env")
-if not env_loaded:
-    # Fallback to project root for setups that keep .env alongside the monorepo
-    load_dotenv(_BACKEND_DIR.parent / ".env")
-
-# Handle potential UTF-8 BOM prefixes that break key lookups
-_BOM_PREFIX = "\ufeff"
-for _key in list(os.environ.keys()):
-    if _key.startswith(_BOM_PREFIX):
-        clean_key = _key.lstrip(_BOM_PREFIX)
-        if clean_key and clean_key not in os.environ:
-            os.environ[clean_key] = os.environ[_key]
-
-# Force UTF-8 output where supported to avoid Windows charmap errors
-for _stream_name in ("stdout", "stderr"):
-    _stream = getattr(sys, _stream_name, None)
-    if _stream is not None and hasattr(_stream, "reconfigure"):
-        try:
-            _stream.reconfigure(encoding="utf-8")
-        except Exception:
-            pass
+load_dotenv()
 
 class SimpleVectorStore:
     def __init__(self):
@@ -41,7 +16,7 @@ class SimpleVectorStore:
         if not api_key:
             raise ValueError("GEMINI_API_KEY không tìm thấy")
         genai.configure(api_key=api_key)
-        print("Gemini API đã sẵn sàng!")
+        print("Gemini API ready!")
         
         # Storage
         self.storage_path = "./simple_vector_storage"
@@ -68,7 +43,7 @@ class SimpleVectorStore:
                 )
                 return result['embedding']
             except Exception as e:
-                print(f"Lỗi tạo embedding: {e}")
+                print(f"Error creating embedding: {e}")
         # Fallback ổn định, không gọi API
         return [hash(text) % 1000 / 1000.0] * 384
 
@@ -81,9 +56,9 @@ class SimpleVectorStore:
             file_path = os.path.join(self.storage_path, "data.json")
             if os.path.exists(file_path):
                 os.remove(file_path)
-            print("Vector store đã được reset.")
+            print("Vector store has been reset.")
         except Exception as e:
-            print(f"Lỗi reset vector store: {e}")
+            print(f"Error resetting vector store: {e}")
     
     def add_documents(self, texts: List[str], metadatas: List[Dict], ids: List[str] = None):
         """Thêm documents"""
@@ -184,9 +159,9 @@ class SimpleVectorStore:
                 self.metadatas = data.get("metadatas", [])
                 self.embeddings = data.get("embeddings", [])
                 
-                print(f"Đã load {len(self.documents)} documents")
+                print(f"Loaded {len(self.documents)} documents")
             except Exception as e:
-                print(f"Lỗi load data: {e}")
+                print(f"Error loading data: {e}")
     
     def get_collection_count(self):
         """Lấy số lượng documents"""

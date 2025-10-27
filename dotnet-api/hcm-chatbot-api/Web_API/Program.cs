@@ -16,7 +16,13 @@ var builder = WebApplication.CreateBuilder(args);
 // ===== CẤU HÌNH CÁC DỊCH VỤ CHO API =====
 
 // Thêm controller và API documentation
-builder.Services.AddControllers(); // Thêm hỗ trợ cho các Controller
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Cấu hình JSON serializer để trả về camelCase thay vì PascalCase
+        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.DictionaryKeyPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+    }); // Thêm hỗ trợ cho các Controller
 builder.Services.AddEndpointsApiExplorer(); // Cho phép API Explorer khám phá endpoints
 
 // Cấu hình Swagger UI để test API

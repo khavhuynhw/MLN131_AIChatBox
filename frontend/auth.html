@@ -1,9 +1,14 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" xml:lang="vi">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="Content-Language" content="vi">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HCM Chatbot - Đăng nhập / Đăng ký</title>
+    <title>MLN131 Chatbot - Chủ Nghĩa Xã Hội Và Thời Kỳ Quá Độ - Đăng nhập / Đăng ký</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="config.js"></script>
     <style>
@@ -780,7 +785,7 @@
                 <div class="logo-icon">
                     <i class="fas fa-star"></i>
                 </div>
-                <span>HCM Chatbot</span>
+                <span>MLN131 Chatbot</span>
             </div>
             <nav class="header-nav">
                 <div class="language-selector">
@@ -800,16 +805,16 @@
     <div class="auth-container">
         <!-- Left Content -->
         <div class="auth-content">
-            <h1 class="content-title">Khám phá tri thức</h1>
-            <h2 class="content-subtitle">Cùng với chúng tôi</h2>
+            <h1 class="content-title">Học tập Chủ nghĩa xã hội</h1>
+            <h2 class="content-subtitle">Và thời kỳ quá độ</h2>
             <p class="content-description">
-                Tham gia cộng đồng học tập về tư tưởng Hồ Chí Minh thông qua công nghệ AI hiện đại. 
-                Trò chuyện, tìm hiểu và khám phá di sản vĩ đại của Người.
+                Tham gia cộng đồng học tập về Chủ nghĩa xã hội và thời kỳ quá độ lên chủ nghĩa xã hội. 
+                Tìm hiểu các nguyên lý cơ bản và quy luật phát triển của xã hội xã hội chủ nghĩa.
             </p>
             <ul class="features-list">
-                <li><i class="fas fa-check-circle"></i> Trò chuyện với AI thông minh</li>
-                <li><i class="fas fa-check-circle"></i> Kho tri thức phong phú</li>
-                <li><i class="fas fa-check-circle"></i> Quiz và bài tập tương tác</li>
+                <li><i class="fas fa-check-circle"></i> Lý luận khoa học chính xác</li>
+                <li><i class="fas fa-check-circle"></i> Tài liệu kinh điển phong phú</li>
+                <li><i class="fas fa-check-circle"></i> Hệ thống đánh giá kiến thức</li>
                 <li><i class="fas fa-check-circle"></i> Theo dõi tiến độ học tập</li>
             </ul>
         </div>
@@ -819,7 +824,7 @@
             <div class="form-card">
                 <div class="form-header">
                     <h2 class="form-title">Chào mừng bạn!</h2>
-                    <p class="form-subtitle">Bắt đầu hành trình khám phá tri thức</p>
+                    <p class="form-subtitle">Bắt đầu hành trình học tập Chủ nghĩa xã hội</p>
                 </div>
 
                 <!-- Form Tabs -->
@@ -904,8 +909,8 @@
                     <div class="fire"></div>
                 </div>
             </div>
-            <h2 class="loading-title">HCM AI đang suy nghĩ...</h2>
-            <p class="loading-subtitle">Rồng thần đang mang tri thức Hồ Chí Minh đến với bạn</p>
+            <h2 class="loading-title">MLN131 đang chuẩn bị...</h2>
+            <p class="loading-subtitle">Hệ thống đang tải kiến thức về Chủ nghĩa xã hội</p>
             <div class="progress">
                 <span>Đang tải...</span>
                 <div class="outer">
@@ -970,31 +975,27 @@
 
             // Show loading
             showLoading();
-            updateLoadingText('Rồng thần đang thức tỉnh...', 'Đang xác thực thông tin đăng nhập...');
+            updateLoadingText('Hệ thống đang khởi động...', 'Đang xác thực thông tin đăng nhập...');
+            
             try {
-                const API_BASE = window.NODEJS_API || 'http://localhost:9000/api';
-                const response = await fetch(`${API_BASE}/auth/login`, {
+                const API_BASE = window.DOTNET_API || 'http://localhost:9000';
+                const response = await fetch(`${API_BASE}/api/auth/login`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json; charset=UTF-8',
                     },
                     body: JSON.stringify(loginData)
                 });
 
                 const result = await response.json();
 
-                const payload = result.data || {};
-
-                if (response.ok && result.success && payload.token && payload.user) {
-                    // Reset previous session data to avoid stale values
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
-
-                    // Save token and user info
-                    localStorage.setItem('token', payload.token);
-                    localStorage.setItem('user', JSON.stringify(payload.user));
+                if (response.ok && result.success) {
+                    // Save token and user info from nested data object
+                    const authData = result.data;
+                    localStorage.setItem('token', authData.token);
+                    localStorage.setItem('user', JSON.stringify(authData.user));
                     
-                    updateLoadingText('Đăng nhập thành công!', 'Rồng thần đang dẫn bạn vào thế giới tri thức...');
+                    updateLoadingText('Đăng nhập thành công!', 'Chào mừng bạn đến với nền tảng học tập...');
                     
                     setTimeout(function() {
                         hideLoading();
@@ -1033,31 +1034,27 @@
 
             // Show loading
             showLoading();
-            updateLoadingText('Rồng thần đang nhận diện...', 'Đang tạo tài khoản mới...');
+            updateLoadingText('Hệ thống đang xử lý...', 'Đang tạo tài khoản học tập mới...');
             
             try {
-                const API_BASE = window.NODEJS_API || 'http://localhost:9000/api';
-                const response = await fetch(`${API_BASE}/auth/register`, {
+                const API_BASE = window.DOTNET_API || 'http://localhost:9000';
+                const response = await fetch(`${API_BASE}/api/auth/register`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json; charset=UTF-8',
                     },
                     body: JSON.stringify(registerData)
                 });
 
                 const result = await response.json();
-                const payload = result.data || {};
 
-                if (response.ok && result.success && payload.token && payload.user) {
-                    // Reset previous session data to avoid stale values
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
-
-                    // Save token and user info
-                    localStorage.setItem('token', payload.token);
-                    localStorage.setItem('user', JSON.stringify(payload.user));
+                if (response.ok && result.success) {
+                    // Save token and user info from nested data object
+                    const authData = result.data;
+                    localStorage.setItem('token', authData.token);
+                    localStorage.setItem('user', JSON.stringify(authData.user));
                     
-                    updateLoadingText('Chào mừng chiến binh tri thức!', 'Rồng thần sẽ dẫn bạn khám phá tư tưởng Hồ Chí Minh...');
+                    updateLoadingText('Chào mừng học viên mới!', 'Bắt đầu hành trình học tập Chủ nghĩa xã hội...');
                     
                     setTimeout(function() {
                         hideLoading();

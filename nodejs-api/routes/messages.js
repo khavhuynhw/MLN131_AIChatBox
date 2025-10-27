@@ -421,7 +421,7 @@ async function getAIResponse(userMessage, conversationId) {
         const context = contextResult.rows.reverse(); // Reverse to get chronological order
 
         // Prepare request to Python AI service
-        const aiServiceUrl = process.env.PYTHON_AI_API || 'https://hcm-chat-2.onrender.com';
+        const aiServiceUrl = process.env.PYTHON_AI_API || 'http://localhost:8000';
         const requestBody = {
             question: userMessage  // Python API expects 'question' field
         };

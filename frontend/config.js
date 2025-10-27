@@ -12,15 +12,14 @@ const API_CONFIG = {
     // Development URLs (local)
     development: {
         PYTHON_AI_API: 'http://localhost:8000',
-        DOTNET_API: 'http://localhost:9000/api',
-        NODEJS_API: 'http://localhost:9000/api' // legacy alias points to Dotnet backend
+        DOTNET_API: 'http://localhost:9000',
+        NODEJS_API: 'http://localhost:9000'
     },
     
     // Production URLs  
     production: {
         PYTHON_AI_API: 'https://hcm-chat-2.onrender.com',
-        DOTNET_API: 'https://hcm-chatbot-nodejs-api.fly.dev/api',
-        NODEJS_API: 'https://hcm-chatbot-nodejs-api.fly.dev/api'
+        NODEJS_API: 'https://hcm-chatbot-nodejs-api.fly.dev'
     }
 };
 
@@ -29,18 +28,18 @@ const CURRENT_CONFIG = isDevelopment ? API_CONFIG.development : API_CONFIG.produ
 
 // Export individual APIs
 window.PYTHON_AI_API = CURRENT_CONFIG.PYTHON_AI_API;
-window.DOTNET_API = CURRENT_CONFIG.DOTNET_API;
+window.DOTNET_API = CURRENT_CONFIG.DOTNET_API || CURRENT_CONFIG.NODEJS_API;
+window.NODEJS_API = CURRENT_CONFIG.NODEJS_API;
 // Legacy support - keep old variable names for compatibility
-window.NODEJS_API = CURRENT_CONFIG.NODEJS_API || window.DOTNET_API;
 window.API_BASE_URL = window.DOTNET_API;
 
-console.log('[config] Current hostname:', window.location.hostname);
-console.log('[config] Current URL:', window.location.href);
-console.log('[config] Environment:', isDevelopment ? 'Development' : 'Production');
-console.log('[config] isDevelopment flag:', isDevelopment);
-console.log('[config] Python AI API:', window.PYTHON_AI_API);
-console.log('[config] Dotnet API:', window.DOTNET_API);
-console.log('[config] Node.js API (alias):', window.NODEJS_API);
-console.log('[config] API Base URL:', window.API_BASE_URL);
-console.log('[config] Full config:', CURRENT_CONFIG);
-console.warn('[config] WARNING: Check Network tab - ensure the expected ports are used');
+console.log('🌐 Current hostname:', window.location.hostname);
+console.log('🌐 Current URL:', window.location.href);
+console.log('🔧 Environment:', isDevelopment ? 'Development' : 'Production');
+console.log('🔧 isDevelopment flag:', isDevelopment);
+console.log('🔧 Python AI API:', window.PYTHON_AI_API);
+console.log('🔧 .NET API:', window.DOTNET_API);
+console.log('🔧 Node.js API:', window.NODEJS_API);
+console.log('🔧 API Base URL:', window.API_BASE_URL);
+console.log('📋 Full config:', CURRENT_CONFIG);
+console.log('🚨 WARNING: Check Network tab - should NOT see localhost!');

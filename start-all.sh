@@ -79,15 +79,15 @@ if ! command -v dotnet &> /dev/null; then
 fi
 
 # Check if Python is installed
-if ! command -v python3 &> /dev/null && ! command -v python &> /dev/null; then
+if ! command -v python3 &> /dev/null; then
     echo "❌ Python 3 is not installed. Please install Python 3.8 or later."
     exit 1
 fi
 
 # Check if PostgreSQL is running
-if ! pg_isready -h localhost -p 5432 >/dev/null 2>&1; then
-    echo "❌ PostgreSQL is not running. Please start PostgreSQL first."
-    echo "   Run: brew services start postgresql"
+if ! docker exec postgres-db-AI pg_isready -U postgres >/dev/null 2>&1; then
+    echo "❌ PostgreSQL container 'postgres-db' is not ready."
+    echo "   👉 Run: docker start postgres-db"
     exit 1
 fi
 
@@ -112,7 +112,7 @@ else
 fi
 
 # 2. Start Python AI Backend
-if start_service "PYTHON_AI" "cd backend && source venv/bin/activate && python -m uvicorn app.main:app --host 0.0.0.0 --port 8000" 8000 "python-ai.log"; then
+if start_service "PYTHON_AI" "cd backend && ./venv/Scripts/python.exe -m uvicorn app.main:app --host 0.0.0.0 --port 8000" 8000 "python-ai.log"; then
     sleep 5
     if wait_for_service "Python AI" "http://localhost:8000/health"; then
         echo ""

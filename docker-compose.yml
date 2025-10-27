@@ -1,0 +1,130 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: hcm-postgres
+    environment:
+      POSTGRES_DB: hcm_chatbot
+      POSTGRES_USER: hcm_user
+      POSTGRES_PASSWORD: hcm_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database_schema.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - hcm-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hcm_user -d hcm_chatbot"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Python AI Backend (FastAPI)
+  python-ai:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: hcm-python-ai
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
+    ports:
+      - "8000:8000"
+    networks:
+      - hcm-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # .NET API
+  dotnet-api:
+    build:
+      context: ./dotnet-api/hcm-chatbot-api
+      dockerfile: Dockerfile
+    container_name: hcm-dotnet-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:5000
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=hcm_chatbot;Username=hcm_user;Password=hcm_password
+      - JWT__SecretKey=${JWT_SECRET_KEY:-your-super-secret-jwt-key-here}
+      - JWT__Issuer=HCM-Chatbot
+      - JWT__Audience=HCM-Chatbot-Users
+    ports:
+      - "5000:5000"
+    networks:
+      - hcm-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Node.js API (Alternative)
+  nodejs-api:
+    build:
+      context: ./nodejs-api
+      dockerfile: Dockerfile
+    container_name: hcm-nodejs-api
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DATABASE_URL=postgresql://hcm_user:hcm_password@postgres:5432/hcm_chatbot
+      - JWT_SECRET=${JWT_SECRET_KEY:-your-super-secret-jwt-key-here}
+    ports:
+      - "3001:3001"
+    networks:
+      - hcm-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    profiles:
+      - nodejs  # Only start when explicitly requested
+
+  # Frontend (Nginx)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: hcm-frontend
+    ports:
+      - "3000:3000"
+    networks:
+      - hcm-network
+    depends_on:
+      - dotnet-api
+      - python-ai
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  hcm-network:
+    driver: bridge
+

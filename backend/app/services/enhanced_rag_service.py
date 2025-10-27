@@ -1,6 +1,6 @@
 import google.generativeai as genai
 from .vector_store import SimpleVectorStore
-from .web_data_collector import WebDataCollector
+# from .web_data_collector import WebDataCollector  # Disabled to prevent external API calls
 import os
 from dotenv import load_dotenv
 import json
@@ -9,62 +9,96 @@ from typing import List
 from urllib.parse import quote
 import unicodedata
 import re
-from pathlib import Path
 
-_BACKEND_DIR = Path(__file__).resolve().parents[2]
-env_loaded = load_dotenv(_BACKEND_DIR / ".env")
-if not env_loaded:
-    load_dotenv(_BACKEND_DIR.parent / ".env")
+load_dotenv()
 
 class EnhancedRAGService:
     def __init__(self):
         self.vector_store = SimpleVectorStore()
-        self.data_collector = WebDataCollector()
+        # self.data_collector = WebDataCollector()  # Disabled to prevent external API calls
         
         genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
         self.model = genai.GenerativeModel('gemini-2.5-flash')
         
         self.last_update = None
-        print("Enhanced RAG Service v2.1 với improved citations sẵn sàng!")
+        print("Enhanced RAG Service v2.1 ready with improved citations!")
     
-    def add_comprehensive_hcm_corpus(self):
-        """Thêm corpus tư tưởng HCM toàn diện với citations chi tiết"""
-        comprehensive_docs = [
-            "Tất cả mọi người đều sinh ra có quyền bình đẳng. Tạo hóa cho họ những quyền không ai có thể xâm phạm được, trong những quyền ấy có quyền được sống, quyền tự do và quyền mưu cầu hạnh phúc. Độc lập là quyền thiêng liêng bất khả xâm phạm của mọi dân tộc trên thế giới.",
-            
-            "Đạo đức cách mạng không phải là từ trời rơi xuống. Nó do đấu tranh và giáo dục hằng ngày mà có. Như cây lúa, muốn tốt thì phải cần mẫn bón phân, tưới nước. Cán bộ cách mạng muốn có đạo đức tốt, thì phải luôn luôn học tập, rèn luyện.",
-            
-            "Đảng ta là đội tiên phong của giai cấp công nhân, đồng thời cũng là đội tiên phong của dân tộc Việt Nam và của nhân dân lao động. Đảng phải luôn luôn gần gũi với dân, phải hiểu dân, học dân, yêu dân. Dân là gốc, có gốc vững thì nước mới êm.",
-            
-            "Học để làm người trước, học để làm việc sau. Đức mà không có tài thì khó mà làm được việc lớn. Tài mà không có đức thì càng tài thì càng làm hại. Vậy đức và tài phải đi đôi với nhau.",
-            
-            "Tự lực cánh sinh không có nghĩa là cô lập mình, không có nghĩa là chúng ta không cần bạn bè. Ngược lại, chúng ta muốn đoàn kết với tất cả những người yêu hòa bình, yêu tiến bộ trên thế giới. Nhưng chủ yếu vẫn phải dựa vào sức mình.",
-            
-            "Ta phải học cái hay của người ta, nhưng phải giữ cái hay của ta. Cái hay của dân tộc ta là truyền thống yêu nước, truyền thống đoàn kết, truyền thống cần cù, sáng tạo. Những cái đó phải kết hợp với khoa học cách mạng.",
-            
-            "Chúng ta vừa là những người yêu nước chân chính, vừa là những quốc tế chủ nghĩa chân chính. Yêu nước và quốc tế chủ nghĩa không mâu thuẫn mà bổ sung cho nhau.",
-            
-            "Dân chủ tập trung có nghĩa là tập trung trên cơ sở dân chủ, dân chủ dưới sự lãnh đạo tập trung. Không có dân chủ thì không thể có tập trung đúng đắn, không có tập trung thì dân chủ sẽ thành tự do phóng túng."
-        ]
+    def add_chapter03_corpus(self):
+        """Thêm corpus Chương 03: Chủ nghĩa xã hội và thời kỳ quá độ lên chủ nghĩa xã hội"""
+        # Load Chapter 03 content from file
+        chapter03_path = os.path.join(os.path.dirname(__file__), "../../data/book/chuong3.md")
         
-        comprehensive_metadata = [
-            {"source": "Tuyên ngôn độc lập CHXHCN Việt Nam, 2/9/1945", "document": "Tuyên ngôn độc lập", "topic": "độc lập", "page": "toàn văn", "credibility_score": 100, "source_type": "primary_source"},
-            {"source": "Toàn tập Hồ Chí Minh, tập 5, tr.234-236", "document": "Sửa đổi lối làm việc (1947)", "topic": "đạo đức", "page": "tr.234-236", "credibility_score": 100, "source_type": "official"},
-            {"source": "Toàn tập Hồ Chí Minh, tập 12, tr.45-48", "document": "Về vai trò của Đảng (1969)", "topic": "đảng-dân", "page": "tr.45-48", "credibility_score": 100, "source_type": "official"},
-            {"source": "Toàn tập Hồ Chí Minh, tập 4, tr.89-92", "document": "Về giáo dục (1946)", "topic": "giáo dục", "page": "tr.89-92", "credibility_score": 100, "source_type": "official"},
-            {"source": "Toàn tập Hồ Chí Minh, tập 6, tr.167-170", "document": "Về tự lực cánh sinh (1955)", "topic": "kinh tế", "page": "tr.167-170", "credibility_score": 100, "source_type": "official"},
-            {"source": "Toàn tập Hồ Chí Minh, tập 8, tr.123-126", "document": "Về truyền thống dân tộc (1958)", "topic": "văn hóa", "page": "tr.123-126", "credibility_score": 100, "source_type": "official"},
-            {"source": "Toàn tập Hồ Chí Minh, tập 7, tr.89-91", "document": "Về quốc tế chủ nghĩa (1957)", "topic": "quốc tế", "page": "tr.89-91", "credibility_score": 100, "source_type": "official"},
-            {"source": "Toàn tập Hồ Chí Minh, tập 15, tr.234-237", "document": "Về dân chủ tập trung (1965)", "topic": "dân chủ", "page": "tr.234-237", "credibility_score": 100, "source_type": "official"}
-        ]
+        if not os.path.exists(chapter03_path):
+            print(f"⚠️ Không tìm thấy file {chapter03_path}")
+            return
+        
+        with open(chapter03_path, 'r', encoding='utf-8') as f:
+            chapter03_content = f.read()
+        
+        # Split content into meaningful chunks
+        comprehensive_docs = self._split_chapter03_content(chapter03_content)
+        
+        # Create metadata for Chapter 03 content
+        comprehensive_metadata = []
+        for i, doc in enumerate(comprehensive_docs):
+            metadata = {
+                "source": "Giáo trình Chủ nghĩa xã hội khoa học (K-2021)",
+                "document": "Chương III: Chủ nghĩa xã hội và thời kỳ quá độ lên chủ nghĩa xã hội",
+                "topic": "chủ nghĩa xã hội",
+                "page": f"chunk_{i+1}",
+                "credibility_score": 100,
+                "source_type": "textbook"
+            }
+            comprehensive_metadata.append(metadata)
         
         self.vector_store.add_documents(comprehensive_docs, comprehensive_metadata)
-        print(f"✅ Đã thêm {len(comprehensive_docs)} documents với citations chi tiết")
+        print(f"Added {len(comprehensive_docs)} documents from Chapter 03 with detailed citations")
+    
+    def _split_chapter03_content(self, content: str) -> List[str]:
+        """Chia nội dung Chương 03 thành các đoạn có ý nghĩa"""
+        # Split by major sections
+        sections = re.split(r'\n(?=[IVX]+\.)', content)
+        
+        chunks = []
+        for section in sections:
+            if not section.strip():
+                continue
+                
+            # Further split by paragraphs
+            paragraphs = section.split('\n\n')
+            current_chunk = ""
+            
+            for paragraph in paragraphs:
+                paragraph = paragraph.strip()
+                if not paragraph:
+                    continue
+                    
+                # If adding this paragraph would make chunk too long, save current chunk
+                if len(current_chunk) + len(paragraph) > 1000 and current_chunk:
+                    chunks.append(current_chunk.strip())
+                    current_chunk = paragraph
+                else:
+                    if current_chunk:
+                        current_chunk += "\n\n" + paragraph
+                    else:
+                        current_chunk = paragraph
+            
+            # Add remaining chunk
+            if current_chunk.strip():
+                chunks.append(current_chunk.strip())
+        
+        return chunks
+
+    def load_chapter03_data(self):
+        """Load dữ liệu Chương 03 vào vector store"""
+        print("🔄 Đang tải dữ liệu Chương 03...")
+        self.add_chapter03_corpus()
+        print("✅ Hoàn thành tải dữ liệu Chương 03!")
 
     def ingest_markdown_folder(self, folder_path: str):
         """Đọc tất cả các file .md trong thư mục và đưa vào vector store.
-        - Mọi citation sẽ trỏ về 'Trang Tư tưởng Hồ Chí Minh'.
-        - 'document' là tên file (không đuôi), ví dụ: 'muc-luc' -> 'Mục lục'.
+        - Mọi citation sẽ trỏ về 'Giáo trình Chủ nghĩa xã hội khoa học'.
+        - 'document' là tên file (không đuôi), ví dụ: 'chuong3' -> 'Chương 03'.
         """
         try:
             if not os.path.exists(folder_path):
@@ -93,7 +127,7 @@ class EnhancedRAGService:
                     # Chuẩn hóa tên hiển thị với dấu tiếng Việt cho các trang chính
                     bl = base.lower()
                     if bl == 'tu-tuong-ho-chi-minh':
-                        display_name = 'Tư tưởng Hồ Chí Minh'
+                        display_name = 'Chủ nghĩa xã hội và thời kỳ quá độ'
                     elif bl == 'muc-luc':
                         display_name = 'Mục lục'
                     elif bl in ('chuong1', 'chuong-1'):
@@ -112,7 +146,7 @@ class EnhancedRAGService:
                     for ch in chunks:
                         all_docs.append(ch)
                         all_metas.append({
-                            "source": "Trang Tư tưởng Hồ Chí Minh",
+                            "source": "Giáo trình Chủ nghĩa xã hội khoa học (K-2021)",
                             "document": display_name,
                             "page": base,
                             "credibility_score": 95,
@@ -120,24 +154,23 @@ class EnhancedRAGService:
                             "url": f"/book/{base}"
                         })
                 except Exception as e:
-                    print(f"Lỗi đọc {fname}: {e}")
+                    print(f"Error reading {fname}: {e}")
 
             if all_docs:
                 self.vector_store.add_documents(all_docs, all_metas)
-                print(f"✅ Đã ingest {len(all_docs)} đoạn từ thư mục markdown {folder_path}")
+                print(f"Ingested {len(all_docs)} segments from markdown folder {folder_path}")
         except Exception as e:
-            print(f"Lỗi ingest markdown: {e}")
+            print(f"Error ingesting markdown: {e}")
     
     def update_knowledge_base(self, force_update=False):
-        """Cập nhật knowledge base chỉ từ tài liệu .md của sách 'Tư tưởng Hồ Chí Minh'.
+        """Cập nhật knowledge base chỉ từ Chương 03: Chủ nghĩa xã hội và thời kỳ quá độ lên chủ nghĩa xã hội.
         Nếu force_update=True: xóa index cũ trước khi ingest để tránh lẫn nguồn cũ.
         """
-        book_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "book"))
         if force_update:
             self.vector_store.reset()
-        self.ingest_markdown_folder(book_dir)
+        self.load_chapter03_data()
         self.last_update = datetime.now()
-        print("Knowledge base updated từ các file .md trong thư mục book/")
+        print("Knowledge base updated từ Chương 03: Chủ nghĩa xã hội và thời kỳ quá độ lên chủ nghĩa xã hội")
     
     def split_text(self, text: str, max_length: int = 700) -> List[str]:
         """Chia nhỏ theo đoạn (paragraph-first) để giữ nguyên các khối định nghĩa/trích dẫn.
@@ -265,6 +298,142 @@ class EnhancedRAGService:
         print(f"🔍 MINDMAP DEBUG: '{question}' -> normalized: '{q_norm}' -> is_mindmap: {is_mindmap}")
         return is_mindmap
     
+    def detect_off_topic_question(self, question: str) -> bool:
+        """Phát hiện câu hỏi không liên quan đến chủ nghĩa xã hội"""
+        q_norm = self._normalize(question)
+        
+        # Các từ khóa liên quan đến chủ nghĩa xã hội
+        socialism_keywords = [
+            'chu nghia xa hoi', 'chủ nghĩa xã hội', 'cnxh', 'cnx',
+            'thoi ky qua do', 'thời kỳ quá độ', 'qua do', 'quá độ',
+            'mac lenin', 'mác lênin', 'mac', 'mác', 'lenin', 'lênin',
+            'cong san', 'cộng sản', 'tu ban', 'tư bản', 'giai cap', 'giai cấp',
+            'cach mang', 'cách mạng', 'vo san', 'vô sản', 'tu san', 'tư sản',
+            'dang cong san', 'đảng cộng sản', 'nha nuoc', 'nhà nước',
+            'kinh te', 'kinh tế', 'san xuat', 'sản xuất', 'quan he', 'quan hệ',
+            'hinh thai', 'hình thái', 'xã hội', 'xa hoi', 'che do', 'chế độ',
+            'dac trung', 'đặc trưng', 'ban chat', 'bản chất', 'muc tieu', 'mục tiêu',
+            'phuong huong', 'phương hướng', 'xay dung', 'xây dựng', 'phat trien', 'phát triển'
+        ]
+        
+        # Các từ khóa không liên quan
+        off_topic_keywords = [
+            'thoi tiet', 'thời tiết', 'weather', 'mua', 'mưa', 'nang', 'nắng',
+            'am nhac', 'âm nhac', 'music', 'nhac', 'nhạc', 'bai hat', 'bài hát',
+            'phim', 'movie', 'film', 'dien anh', 'điện ảnh', 'tv', 'tivi',
+            'the thao', 'thể thao', 'sport', 'bong da', 'bóng đá', 'football',
+            'game', 'tro choi', 'trò chơi', 'video game', 'game online',
+            'du lich', 'du lịch', 'travel', 'di choi', 'đi chơi', 'nghi mat', 'nghỉ mát',
+            'an uong', 'ăn uống', 'food', 'thuc an', 'thức ăn', 'mon an', 'món ăn',
+            'nau an', 'nấu ăn', 'cach nau', 'cách nấu', 'pho', 'phở', 'bun', 'bún',
+            'thoi trang', 'thời trang', 'fashion', 'quan ao', 'quần áo', 'giay dep', 'giày dép',
+            'lam dep', 'làm đẹp', 'beauty', 'my pham', 'mỹ phẩm', 'trang diem', 'trang điểm',
+            'cong nghe', 'công nghệ', 'technology', 'dien thoai', 'điện thoại', 'smartphone',
+            'may tinh', 'máy tính', 'computer', 'laptop', 'internet', 'wifi',
+            'hoc tap', 'học tập', 'study', 'hoc', 'học', 'bai tap', 'bài tập',
+            'cong viec', 'công việc', 'job', 'viec lam', 'việc làm', 'tuyen dung', 'tuyển dụng',
+            'tinh yeu', 'tình yêu', 'love', 'yeu', 'yêu', 'hen ho', 'hẹn hò',
+            'gia dinh', 'gia đình', 'family', 'bo me', 'bố mẹ', 'cha me', 'cha mẹ',
+            'ban be', 'bạn bè', 'friend', 'ban', 'bạn', 'tinh ban', 'tình bạn',
+            'mua sam', 'mua sắm', 'shopping', 'mua', 'mua', 'ban', 'bán', 'gia', 'giá'
+        ]
+        
+        # Các từ khóa cảm tính/đánh giá chủ quan
+        emotional_keywords = [
+            'tot hay khong', 'tốt hay không', 'hay hay khong', 'hay hay không',
+            'co tot khong', 'có tốt không', 'tot nhat', 'tốt nhất', 'hay nhat', 'hay nhất',
+            'danh gia', 'đánh giá', 'y kien', 'ý kiến', 'suy nghi', 'suy nghĩ',
+            'cam nhan', 'cảm nhận', 'cam giac', 'cảm giác', 'thich', 'thích',
+            'khong thich', 'không thích', 'ghet', 'ghét', 'yeu', 'yêu',
+            'thuong', 'thương', 'ghe', 'ghê', 'kinh', 'kinh khủng',
+            'tuyet voi', 'tuyệt vời', 'kinh khung', 'kinh khủng', 'toi te', 'tồi tệ',
+            'xau', 'xấu', 'dep', 'đẹp', 'xinh', 'xinh đẹp', 'dep trai', 'đẹp trai',
+            'thong minh', 'thông minh', 'ngu', 'ngu ngốc', 'stupid', 'smart',
+            'good', 'bad', 'excellent', 'terrible', 'awesome', 'horrible'
+        ]
+        
+        # Kiểm tra xem có từ khóa liên quan đến chủ nghĩa xã hội không
+        has_socialism_keywords = any(keyword in q_norm for keyword in socialism_keywords)
+        
+        # Kiểm tra xem có từ khóa không liên quan không
+        has_off_topic_keywords = any(keyword in q_norm for keyword in off_topic_keywords)
+        
+        # Kiểm tra xem có từ khóa cảm tính/đánh giá chủ quan không
+        has_emotional_keywords = any(keyword in q_norm for keyword in emotional_keywords)
+        
+        # Nếu có từ khóa không liên quan và không có từ khóa liên quan đến CNXH
+        is_off_topic = has_off_topic_keywords and not has_socialism_keywords
+        
+        # Nếu có từ khóa cảm tính (bất kể có từ khóa CNXH hay không)
+        is_emotional = has_emotional_keywords
+        
+        # Kết hợp cả hai điều kiện
+        is_inappropriate = is_off_topic or is_emotional
+        
+        print(f"🔍 OFF-TOPIC DEBUG: '{question}' -> normalized: '{q_norm}' -> is_off_topic: {is_off_topic}, is_emotional: {is_emotional}, is_inappropriate: {is_inappropriate}")
+        return is_inappropriate
+    
+    def _handle_off_topic_question(self, question: str):
+        """Xử lý câu hỏi không liên quan hoặc cảm tính về chủ nghĩa xã hội"""
+        print(f"🚫 Handling off-topic/emotional question: {question}")
+        
+        # Kiểm tra xem có phải câu hỏi cảm tính không
+        q_norm = self._normalize(question)
+        emotional_keywords = [
+            'tot hay khong', 'tốt hay không', 'hay hay khong', 'hay hay không',
+            'co tot khong', 'có tốt không', 'danh gia', 'đánh giá', 'y kien', 'ý kiến'
+        ]
+        is_emotional = any(keyword in q_norm for keyword in emotional_keywords)
+        
+        if is_emotional:
+            response = f"""Tôi hiểu bạn muốn đánh giá về chủ nghĩa xã hội, nhưng tôi là chatbot học thuật chuyên cung cấp **thông tin khách quan** về **Chủ nghĩa xã hội và thời kỳ quá độ lên chủ nghĩa xã hội**.
+
+### 🎯 Thay vì đánh giá chủ quan, tôi có thể giúp bạn hiểu:
+
+**📖 Về mặt lý luận:**
+- Định nghĩa chủ nghĩa xã hội theo 4 góc độ
+- Đặc trưng bản chất của chủ nghĩa xã hội
+- Quan điểm của Mác - Lênin về CNXH
+
+**🏗️ Về mặt thực tiễn:**
+- Thời kỳ quá độ lên chủ nghĩa xã hội
+- Sự vận dụng của Đảng Cộng sản Việt Nam
+- Mục tiêu và phương hướng xây dựng CNXH
+
+### 💡 Câu hỏi học thuật phù hợp:
+- "Chủ nghĩa xã hội là gì?"
+- "Đặc trưng của chủ nghĩa xã hội?"
+- "Thời kỳ quá độ có đặc điểm gì?"
+- "Lênin nhấn mạnh điều gì?"
+
+Hãy hỏi tôi về những khía cạnh học thuật này để có cái nhìn toàn diện! 📚"""
+        else:
+            response = f"""Xin lỗi, tôi là chatbot chuyên về **Chủ nghĩa xã hội và thời kỳ quá độ lên chủ nghĩa xã hội**. 
+
+Tôi không thể trả lời câu hỏi về chủ đề khác, nhưng tôi có thể giúp bạn tìm hiểu về:
+
+### 📚 Các chủ đề tôi có thể hỗ trợ:
+- **Định nghĩa chủ nghĩa xã hội** (4 góc độ tiếp cận)
+- **Đặc trưng bản chất** của chủ nghĩa xã hội
+- **Thời kỳ quá độ** lên chủ nghĩa xã hội
+- **Quan điểm của Mác - Lênin** về chủ nghĩa xã hội
+- **Sự vận dụng** của Đảng Cộng sản Việt Nam
+- **Mục tiêu và phương hướng** xây dựng CNXH ở Việt Nam
+
+### 💡 Gợi ý câu hỏi:
+- "Chủ nghĩa xã hội là gì?"
+- "Đặc trưng của chủ nghĩa xã hội?"
+- "Thời kỳ quá độ có đặc điểm gì?"
+- "Lênin nhấn mạnh điều gì?"
+
+Hãy thử hỏi tôi về những chủ đề trên nhé! 😊"""
+        
+        return {
+            "answer": response,
+            "sources": ["Hướng dẫn sử dụng chatbot"],
+            "confidence": 100
+        }
+    
     def get_full_chapter_content(self, chapter_name: str) -> str:
         """Đọc toàn bộ nội dung của một chương từ file .md"""
         book_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "book"))
@@ -275,10 +444,10 @@ class EnhancedRAGService:
                 with open(chapter_file, 'r', encoding='utf-8') as f:
                     return f.read().strip()
             else:
-                print(f"Không tìm thấy file: {chapter_file}")
+                print(f"File not found: {chapter_file}")
                 return ""
         except Exception as e:
-            print(f"Lỗi đọc file {chapter_file}: {e}")
+            print(f"Error reading file {chapter_file}: {e}")
             return ""
 
     def generate_response_with_sources(self, question: str):
@@ -303,73 +472,88 @@ class EnhancedRAGService:
                 print(f"🧠 MINDMAP REQUEST detected!")
                 return self._handle_mindmap_request(question)
             
+            # Kiểm tra xem có phải câu hỏi không liên quan đến chủ nghĩa xã hội không
+            if self.detect_off_topic_question(question):
+                print(f"🚫 OFF-TOPIC QUESTION detected!")
+                return self._handle_off_topic_question(question)
+            
             # Tăng số lượng kết quả và ưu tiên đoạn chứa định nghĩa chuẩn
-            search_results = self.vector_store.search(question, n_results=12)
+            search_results = self.vector_store.search(question, n_results=10)
+            
+            # Nếu hỏi về định nghĩa chủ nghĩa xã hội, tìm kiếm thêm đoạn định nghĩa 4 góc độ
+            qn = self._normalize(question)
+            if any(k in qn for k in ['chu nghia xa hoi la gi', 'chủ nghĩa xã hội là gì', 'định nghĩa chủ nghĩa xã hội']):
+                print(f"🔍 Tìm kiếm thêm đoạn định nghĩa 4 góc độ...")
+                def_search = self.vector_store.search('có thể được tiếp cận từ nhiều góc độ', n_results=3)
+                if def_search['documents'][0]:
+                    # Thêm đoạn định nghĩa vào đầu kết quả
+                    search_results['documents'][0].insert(0, def_search['documents'][0][0])
+                    search_results['metadatas'][0].insert(0, def_search['metadatas'][0][0])
+                    search_results['scores'][0].insert(0, def_search['scores'][0][0])
+                    print(f"Added 4-angle definition to results")
 
-            # Quyết định fallback thông minh với cải tiến
-            min_score = float(os.getenv("MIN_RAG_SCORE", "0.2"))  # Trở lại 0.2
+            # Tối ưu hóa: Giảm độ phức tạp của fallback logic
+            min_score = float(os.getenv("MIN_RAG_SCORE", "0.05"))  # Giảm ngưỡng để ít fallback hơn
             scores = search_results.get('scores', [[]])[0] if isinstance(search_results.get('scores'), list) else []
             best_score = scores[0] if scores else 0.0
             
             # Lấy top 3 documents để đánh giá
             docs = search_results['documents'][0][:3] if search_results['documents'][0] else []
             
-            # Debug logging
-            print(f"🔍 SMART FALLBACK DEBUG:")
-            print(f"   Question: '{question}'")
-            print(f"   Best score: {best_score}")
-            print(f"   Min score threshold: {min_score}")
-            print(f"   Number of docs: {len(docs)}")
-            if docs:
-                print(f"   First doc preview: {docs[0][:100]}...")
+            # Debug logging (rút gọn)
+            print(f"🔍 RAG DEBUG: score={best_score:.3f}, docs={len(docs)}")
             
-            # Điều kiện fallback cơ bản - CHỈ khi thực sự không có docs hoặc score quá thấp
-            should_fallback_basic = (not docs) or (best_score < min_score)
-            
-            # Chỉ dùng AI evaluation khi score gần ngưỡng (0.2-0.35)
-            should_fallback_smart = False
-            if docs and best_score >= min_score and best_score < 0.35:
-                # Chỉ evaluate khi score ở vùng nghi ngờ
-                context_sample = "\n".join(docs[:2])[:800]  # Tăng sample size
-                
-                evaluation_prompt = f"""Đánh giá xem các đoạn văn sau có thể trả lời câu hỏi hay không:
-
-CÂU HỎI: {question}
-
-CÁC ĐOẠN VĂN:
-{context_sample}
-
-QUY TẮC ĐÁNH GIÁ:
-- Trả lời "CÓ" nếu đoạn văn có thông tin để trả lời câu hỏi (dù chỉ một phần)
-- Trả lời "KHÔNG" chỉ khi đoạn văn hoàn toàn không liên quan hoặc ngoài chủ đề
-- Với câu hỏi về chương/phần cụ thể: nếu đoạn văn thuộc chương đó thì trả lời "CÓ"
-
-Trả lời: CÓ hoặc KHÔNG"""
-
-                try:
-                    eval_response = self.model.generate_content(evaluation_prompt)
-                    eval_result = eval_response.text.strip().upper()
-                    should_fallback_smart = eval_result == "KHÔNG"
-                    print(f"   AI evaluation (score {best_score:.3f}): {eval_result}")
-                    print(f"   Should fallback smart: {should_fallback_smart}")
-                except Exception as e:
-                    print(f"   AI evaluation failed: {e}")
-                    should_fallback_smart = False
-            else:
-                print(f"   Skip AI evaluation (score {best_score:.3f})")
-            
-            should_fallback = should_fallback_basic or should_fallback_smart
+            # Điều kiện fallback đơn giản - chỉ khi thực sự không có docs hoặc score quá thấp
+            should_fallback = (not docs) or (best_score < min_score)
             print(f"   Final should fallback: {should_fallback}")
             
             if should_fallback:
                 # Fallback: không có nội dung trong .md → trả lời trực tiếp bằng Gemini
-                fallback_prompt = f"""Trả lời câu hỏi sau bằng tiếng Việt một cách tự nhiên và chính xác:
+                fallback_prompt = f"""TRẢ LỜI CÂU HỎI VỀ CHỦ NGHĨA XÃ HỘI VÀ THỜI KỲ QUÁ ĐỘ:
 
 {question}
 
-Hãy trả lời trực tiếp, ngắn gọn và hữu ích."""
+QUY TẮC NGHIÊM NGẶT:
+- KHÔNG ĐƯỢC bắt đầu bằng "Với tư cách là...", "Tôi là...", "Chào bạn...", "là một chuyên gia..."
+        - KHÔNG ĐƯỢC tự nhận là "chuyên gia về tư tưởng Hồ Chí Minh" hoặc bất kỳ chuyên gia nào khác
+- KHÔNG ĐƯỢC giới thiệu bản thân
+- BẮT ĐẦU NGAY bằng nội dung câu trả lời
+- Tập trung vào nội dung Chương 03: Chủ nghĩa xã hội và thời kỳ quá độ
+- Giọng điệu: Khách quan, học thuật
+
+TRẢ LỜI NGAY:"""
                 resp = self.model.generate_content(fallback_prompt)
                 answer_text = resp.text or ""
+                
+                # Loại bỏ các cụm từ không mong muốn
+                unwanted_phrases = [
+                    "Với tư cách là một chuyên gia về tư tưởng Hồ Chí Minh",
+                    "với tư cách là một chuyên gia về tư tưởng Hồ Chí Minh", 
+                    "là một chuyên gia về tư tưởng Hồ Chí Minh",
+                    "Chào bạn, là một chuyên gia về tư tưởng Hồ Chí Minh",
+                    "chào bạn, là một chuyên gia về tư tưởng Hồ Chí Minh",
+                    "Trong tư tưởng Hồ Chí Minh",
+                    "trong tư tưởng Hồ Chí Minh",
+                    "Theo tư tưởng Hồ Chí Minh",
+                    "theo tư tưởng Hồ Chí Minh",
+                    "Hồ Chí Minh cho rằng",
+                    "hồ Chí Minh cho rằng",
+                    "Với tư cách là",
+                    "với tư cách là",
+                    "Tôi là chuyên gia",
+                    "tôi là chuyên gia"
+                ]
+                
+                for phrase in unwanted_phrases:
+                    if phrase in answer_text:
+                        answer_text = answer_text.replace(phrase, "").strip()
+                        # Loại bỏ dấu phẩy thừa ở đầu
+                        if answer_text.startswith(","):
+                            answer_text = answer_text[1:].strip()
+                        if answer_text.startswith("tôi"):
+                            answer_text = answer_text[3:].strip()
+                        if answer_text.startswith("Tôi"):
+                            answer_text = answer_text[3:].strip()
                 
                 # Làm sạch format (chỉ cơ bản)
                 import re
@@ -392,7 +576,7 @@ Hãy trả lời trực tiếp, ngắn gọn và hữu ích."""
             want_subject = ('doi tuong nghien cuu' in qn) or (('doi tuong' in qn) and ('nghien cuu' in qn))
             def contains_def(txt: str) -> bool:
                 tn = self._normalize(txt)
-                return ('tu tuong ho chi minh la' in tn) or ('nêu khái niệm' in txt.lower())
+                return ('tu tuong ho chi minh la' in tn) or ('nêu khái niệm' in txt.lower()) or ('co the duoc tiep can tu nhieu goc do' in tn) or ('phong trao thuc tien' in tn and 'trao luu tu tuong' in tn)
             def contains_subject(txt: str) -> bool:
                 tn = self._normalize(txt)
                 return ('doi tuong nghien cuu' in tn)
@@ -419,15 +603,15 @@ Hãy trả lời trực tiếp, ngắn gọn và hữu ích."""
                 # Nhãn ngắn gọn chỉ ghi chương
                 short_label = self._slug_to_title(page_info) if page_info else (document_title or 'Nguồn')
 
-                # Context citation cũng rút gọn
-                context += f"[Nguồn {i+1} - {short_label}]: {doc}\n"
+                # Context không hiển thị citation
+                context += f"{doc}\n"
 
                 # Link mở trang book và highlight đúng trích đoạn (giữ href đầy đủ)
                 snippet = (doc or '').strip().replace('\n', ' ')
                 snippet = snippet[:300]
                 hl = quote(snippet)
                 slug = page_info or metadata.get('page', '')
-                href = f"book/tu-tuong-ho-chi-minh.html#{slug}?hl={hl}"
+                href = f"book/chuong3.html#{slug}?hl={hl}"
                 label = short_label if short_label else slug
                 anchor_html = f"<a href=\"{href}\" target=\"_blank\" rel=\"noopener noreferrer\">{label}</a>"
 
@@ -439,33 +623,106 @@ Hãy trả lời trực tiếp, ngắn gọn và hữu ích."""
                     "document": document_title
                 })
             
-            prompt = f"""Bạn là chuyên gia về tư tưởng Hồ Chí Minh với kiến thức sâu rộng.
-Hãy trả lời câu hỏi bằng cách KẾT HỢP tài liệu chính thức và kiến thức chuyên môn của bạn:
+            prompt = f"""TRẢ LỜI CÂU HỎI VỀ CHỦ NGHĨA XÃ HỘI VÀ THỜI KỲ QUÁ ĐỘ:
 
-NGUỒN TÀI LIỆU CHÍNH THỨC:
+TÀI LIỆU THAM KHẢO:
 {context}
 
 CÂU HỎI: {question}
 
-YÊU CẦU:
-- Trả lời một cách tự nhiên, phong phú và có chiều sâu
-- SỬ DỤNG tài liệu làm nền tảng và PHÁT TRIỂN thêm với kiến thức liên quan
-- Trích dẫn nguồn tài liệu: [Nguồn X - Tên chương]
-- Làm phong phú câu trả lời bằng:
-  + Bối cảnh lịch sử và xã hội
-  + Ý nghĩa thực tiễn và ứng dụng
-  + Ví dụ minh họa cụ thể
-  + Liên hệ với thời đại hiện tại
-- Dùng tiêu đề markdown (##, ###) và bullet points để cấu trúc rõ ràng
-- Giọng điệu: Học thuật nhưng dễ hiểu, sinh động, không máy móc
+QUY TẮC NGHIÊM NGẶT:
+- KHÔNG ĐƯỢC bắt đầu bằng "Với tư cách là...", "Tôi là...", "Chào bạn...", "là một chuyên gia..."
+        - KHÔNG ĐƯỢC tự nhận là "chuyên gia về tư tưởng Hồ Chí Minh" hoặc bất kỳ chuyên gia nào khác
+- KHÔNG ĐƯỢC giới thiệu bản thân
+        - KHÔNG ĐƯỢC bắt đầu bằng "Trong tư tưởng Hồ Chí Minh..." hoặc bất kỳ tư tưởng nào khác
+        - KHÔNG ĐƯỢC bắt đầu bằng "Theo tư tưởng Hồ Chí Minh..." hoặc bất kỳ tư tưởng nào khác
+- KHÔNG ĐƯỢC bắt đầu bằng "Hồ Chí Minh cho rằng..."
+- BẮT ĐẦU NGAY bằng nội dung câu trả lời về chủ nghĩa xã hội
+- CHỈ sử dụng thông tin từ tài liệu được cung cấp
+- Dùng tiêu đề markdown (##, ###) và bullet points
+- Giọng điệu: Khách quan, học thuật, dựa trên tài liệu
+- Tập trung vào nội dung chủ nghĩa xã hội và thời kỳ quá độ
 
-Hãy tạo một câu trả lời hoàn chỉnh và có giá trị cao, không chỉ trích dẫn khô khan.
+HƯỚNG DẪN TRẢ LỜI CỤ THỂ:
+- Nếu câu hỏi về "Chủ nghĩa xã hội là gì?", BẮT BUỘC trả lời theo đúng 4 góc độ trong tài liệu:
+  1. Là phong trào thực tiễn – phong trào đấu tranh của nhân dân lao động chống lại áp bức, bất công, chống lại giai cấp thống trị
+  2. Là trào lưu tư tưởng – lý luận phản ánh lý tưởng giải phóng nhân dân lao động khỏi áp bức, bóc lột
+  3. Là một khoa học – chủ nghĩa xã hội khoa học là khoa học về sứ mệnh lịch sử của giai cấp công nhân
+  4. Là một chế độ xã hội tốt đẹp, là giai đoạn đầu của hình thái kinh tế – xã hội cộng sản chủ nghĩa
+- Nếu câu hỏi về đặc trưng, trả lời theo 6 đặc trưng: giải phóng con người, nền kinh tế phát triển cao, nhân dân làm chủ, văn hóa mới, công bằng bình đẳng, quá trình phát triển lâu dài
+- Nếu câu hỏi về thời kỳ quá độ, trả lời theo khái niệm, tính tất yếu, đặc điểm
+- Luôn trích dẫn chính xác từ tài liệu, không tự suy diễn
+
+QUAN TRỌNG: Nếu tài liệu có đoạn "Chủ nghĩa xã hội có thể được tiếp cận từ nhiều góc độ khác nhau", BẮT BUỘC sử dụng đoạn đó làm câu trả lời chính và trích dẫn đầy đủ 4 góc độ.
+
+CẤU TRÚC TRẢ LỜI BẮT BUỘC:
+- Bắt đầu bằng: "Chủ nghĩa xã hội có thể được tiếp cận từ 4 góc độ khác nhau:"
+- Liệt kê đầy đủ 4 góc độ theo đúng thứ tự trong tài liệu:
+  1. Là phong trào thực tiễn – phong trào đấu tranh của nhân dân lao động chống lại áp bức, bất công, chống lại giai cấp thống trị
+  2. Là trào lưu tư tưởng – lý luận phản ánh lý tưởng giải phóng nhân dân lao động khỏi áp bức, bóc lột
+  3. Là một khoa học – chủ nghĩa xã hội khoa học là khoa học về sứ mệnh lịch sử của giai cấp công nhân
+  4. Là một chế độ xã hội tốt đẹp, là giai đoạn đầu của hình thái kinh tế – xã hội cộng sản chủ nghĩa
+- Không được thêm nội dung khác vào phần định nghĩa cơ bản
+
+TRẢ LỜI NGAY:
 """
 
-            # Ưu tiên trích nguyên văn nếu tìm thấy câu mở đầu "Tư tưởng Hồ Chí Minh là ..."
+            # Ưu tiên trích nguyên văn nếu tìm thấy định nghĩa chính xác
             # (được hướng dẫn ngay trong prompt)
             response = self.model.generate_content(prompt)
             answer_text = response.text or ""
+            
+            # Xử lý đặc biệt cho câu hỏi về định nghĩa chủ nghĩa xã hội
+            if any(k in qn for k in ['chu nghia xa hoi la gi', 'chủ nghĩa xã hội là gì', 'định nghĩa chủ nghĩa xã hội']):
+                # Kiểm tra xem có đoạn định nghĩa 4 góc độ trong context không
+                if any('có thể được tiếp cận từ nhiều góc độ' in doc for doc in context_docs):
+                    print(f"Detected 4-angle definition, creating standard answer...")
+                    answer_text = """Chủ nghĩa xã hội có thể được tiếp cận từ 4 góc độ khác nhau:
+
+1. **Là phong trào thực tiễn** – phong trào đấu tranh của nhân dân lao động chống lại áp bức, bất công, chống lại giai cấp thống trị.
+
+2. **Là trào lưu tư tưởng** – lý luận phản ánh lý tưởng giải phóng nhân dân lao động khỏi áp bức, bóc lột.
+
+3. **Là một khoa học** – chủ nghĩa xã hội khoa học là khoa học về sứ mệnh lịch sử của giai cấp công nhân.
+
+4. **Là một chế độ xã hội tốt đẹp**, là giai đoạn đầu của hình thái kinh tế – xã hội cộng sản chủ nghĩa."""
+                    print(f"Created standard 4-angle answer")
+                    # Bỏ qua xử lý post-processing cho câu trả lời đặc biệt này
+                    return {
+                        "answer": answer_text,
+                        "sources": sources_used,
+                        "confidence": 95
+                    }
+            
+            # Loại bỏ các cụm từ không mong muốn
+            unwanted_phrases = [
+                "Với tư cách là một chuyên gia về tư tưởng Hồ Chí Minh",
+                "với tư cách là một chuyên gia về tư tưởng Hồ Chí Minh", 
+                "là một chuyên gia về tư tưởng Hồ Chí Minh",
+                "Chào bạn, là một chuyên gia về tư tưởng Hồ Chí Minh",
+                "chào bạn, là một chuyên gia về tư tưởng Hồ Chí Minh",
+                "Trong tư tưởng Hồ Chí Minh",
+                "trong tư tưởng Hồ Chí Minh",
+                "Theo tư tưởng Hồ Chí Minh",
+                "theo tư tưởng Hồ Chí Minh",
+                "Hồ Chí Minh cho rằng",
+                "hồ Chí Minh cho rằng",
+                "Với tư cách là",
+                "với tư cách là",
+                "Tôi là chuyên gia",
+                "tôi là chuyên gia"
+            ]
+            
+            for phrase in unwanted_phrases:
+                if phrase in answer_text:
+                    answer_text = answer_text.replace(phrase, "").strip()
+                    # Loại bỏ dấu phẩy thừa ở đầu
+                    if answer_text.startswith(","):
+                        answer_text = answer_text[1:].strip()
+                    if answer_text.startswith("tôi"):
+                        answer_text = answer_text[3:].strip()
+                    if answer_text.startswith("Tôi"):
+                        answer_text = answer_text[3:].strip()
             
             # Làm sạch format text (chỉ giữ lại basic cleaning)
             import re
@@ -528,7 +785,7 @@ Hãy tạo một câu trả lời hoàn chỉnh và có giá trị cao, không c
             chapter_title = self._slug_to_title(chapter_name)
             
             # Tạo prompt đặc biệt cho tóm tắt chương
-            prompt = f"""Bạn là chuyên gia về tư tưởng Hồ Chí Minh. Hãy tóm tắt {chapter_title} dựa trên nội dung sau:
+            prompt = f"""Hãy tóm tắt {chapter_title} về Chủ nghĩa xã hội và thời kỳ quá độ lên chủ nghĩa xã hội dựa trên nội dung sau:
 
 {summary_content}
 
@@ -537,7 +794,7 @@ YÊU CẦU TÓM TẮT:
 - Sử dụng tiêu đề markdown (##, ###) để chia các mục chính
 - Trình bày các ý chính bằng danh sách bullet points
 - Nêu rõ các khái niệm và định nghĩa quan trọng
-- Làm nổi bật những tư tưởng cốt lõi của Hồ Chí Minh trong chương này
+- Làm nổi bật những khái niệm và lý luận cốt lõi trong chương này
 - Trả lời bằng tiếng Việt, văn phong học thuật nhưng dễ hiểu
 - Độ dài: 800-1200 từ
 
@@ -608,7 +865,7 @@ Bắt đầu tóm tắt:"""
                     search_results = self.vector_store.search(topic, n_results=8)
                     relevant_content = "\n\n".join(search_results['documents'][0][:6]) if search_results['documents'][0] else ""
                     source_info = {
-                        "source": "Tư liệu tư tưởng Hồ Chí Minh",
+                        "source": "Giáo trình Chủ nghĩa xã hội khoa học (K-2021)",
                         "credibility": 85,
                         "type": "mindmap",
                         "url": "",
@@ -625,7 +882,7 @@ Bắt đầu tóm tắt:"""
                 # Lấy nội dung liên quan
                 relevant_content = "\n\n".join(search_results['documents'][0][:6])
                 source_info = {
-                    "source": "Tư liệu tư tưởng Hồ Chí Minh",
+                    "source": "Giáo trình Chủ nghĩa xã hội khoa học (K-2021)",
                     "credibility": 95,
                     "type": "mindmap",
                     "url": "",
@@ -822,10 +1079,10 @@ mindmap
                 
                 # Loại bỏ các từ không cần thiết
                 topic = re.sub(r'(hồ chí minh|hcm)', '', topic).strip()
-                return topic.title() if topic else "Tư tưởng Hồ Chí Minh"
+                return topic.title() if topic else "Chủ nghĩa xã hội và thời kỳ quá độ"
         
         # Nếu không tìm thấy, trả về chủ đề mặc định
-        return "Tư tưởng Hồ Chí Minh"
+        return "Chủ nghĩa xã hội và thời kỳ quá độ"
     
     def _clean_mermaid_code(self, code: str) -> str:
         """Làm sạch và chuẩn hóa Mermaid code"""
@@ -880,7 +1137,7 @@ mindmap
         return {
             "answer": f"## Sơ đồ tư duy: {topic}\n\n{general_mindmap}",
             "sources": [{
-                "source": "Tư liệu tư tưởng Hồ Chí Minh",
+                "source": "Giáo trình Chủ nghĩa xã hội khoa học (K-2021)",
                 "credibility": 85,
                 "type": "mindmap",
                 "url": "",
@@ -894,7 +1151,7 @@ mindmap
         return {
             "total_documents": self.vector_store.get_collection_count(),
             "last_update": self.last_update.isoformat() if self.last_update else None,
-            "trusted_sources_count": len(self.data_collector.trusted_sources),
+            "trusted_sources_count": 0,  # Disabled external data collection
             "status": "ready",
             "features": ["chapter_summary", "mindmap_generation", "rag_search"]
         }

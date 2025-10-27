@@ -1,0 +1,72 @@
+{
+  "id": "chuong3_quiz_1",
+  "title": "Chủ nghĩa xã hội - Khái niệm và đặc trưng",
+  "chapter": "Chương III",
+  "difficulty": "easy",
+  "description": "Kiểm tra kiến thức cơ bản về khái niệm và đặc trưng của chủ nghĩa xã hội",
+  "questions": [
+    {
+      "id": "q1",
+      "question": "Chủ nghĩa xã hội có thể được tiếp cận từ bao nhiêu góc độ khác nhau?",
+      "options": [
+        "2 góc độ",
+        "3 góc độ", 
+        "4 góc độ",
+        "5 góc độ"
+      ],
+      "correct_answer": 2,
+      "explanation": "Chủ nghĩa xã hội có thể được tiếp cận từ 4 góc độ: phong trào thực tiễn, trào lưu tư tưởng, một khoa học, và một chế độ xã hội tốt đẹp."
+    },
+    {
+      "id": "q2", 
+      "question": "Chủ nghĩa xã hội khoa học là khoa học về gì?",
+      "options": [
+        "Sứ mệnh lịch sử của giai cấp tư sản",
+        "Sứ mệnh lịch sử của giai cấp công nhân",
+        "Sứ mệnh lịch sử của giai cấp nông dân",
+        "Sứ mệnh lịch sử của trí thức"
+      ],
+      "correct_answer": 1,
+      "explanation": "Chủ nghĩa xã hội khoa học là khoa học về sứ mệnh lịch sử của giai cấp công nhân."
+    },
+    {
+      "id": "q3",
+      "question": "Ai là người bổ sung và phát triển học thuyết hình thái kinh tế - xã hội của Mác và Ăngghen?",
+      "options": [
+        "Stalin",
+        "V.I. Lênin",
+        "Mao Trạch Đông",
+        "Hồ Chí Minh"
+      ],
+      "correct_answer": 1,
+      "explanation": "V.I. Lênin đã bổ sung, phát triển và hiện thực hóa học thuyết hình thái kinh tế - xã hội trong công cuộc xây dựng chủ nghĩa xã hội ở nước Nga Xô Viết."
+    },
+    {
+      "id": "q4",
+      "question": "Theo học thuyết Mác - Lênin, sự thay thế hình thái kinh tế - xã hội tư bản chủ nghĩa bằng hình thái kinh tế - xã hội cộng sản chủ nghĩa là gì?",
+      "options": [
+        "Một quá trình ngẫu nhiên",
+        "Một quá trình lịch sử - tự nhiên",
+        "Một quá trình nhân tạo",
+        "Một quá trình tạm thời"
+      ],
+      "correct_answer": 1,
+      "explanation": "Theo học thuyết Mác - Lênin, sự thay thế hình thái kinh tế - xã hội tư bản chủ nghĩa bằng hình thái kinh tế - xã hội cộng sản chủ nghĩa là một quá trình lịch sử - tự nhiên."
+    },
+    {
+      "id": "q5",
+      "question": "C. Mác khẳng định rằng giữa xã hội tư bản chủ nghĩa và xã hội cộng sản chủ nghĩa tồn tại gì?",
+      "options": [
+        "Một thời kỳ quá độ chính trị",
+        "Một thời kỳ cách mạng",
+        "Một thời kỳ phát triển",
+        "Một thời kỳ chuyển đổi"
+      ],
+      "correct_answer": 0,
+      "explanation": "C. Mác khẳng định: giữa xã hội tư bản chủ nghĩa và xã hội cộng sản chủ nghĩa tồn tại một thời kỳ quá độ chính trị, trong đó nhà nước chuyên chính vô sản là đặc trưng nổi bật."
+    }
+  ],
+  "created_at": "2024-10-21T20:00:00Z",
+  "time_limit": 300
+}
+

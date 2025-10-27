@@ -156,7 +156,7 @@ class WebDataCollector:
         return 'unknown'
     
     def collect_hcm_content(self, topics: List[str]) -> List[Dict]:
-        """Thu thập nội dung về các chủ đề HCM"""
+        """Thu thập nội dung về các chủ đề Chủ nghĩa xã hội và thời kỳ quá độ"""
         all_results = []
         
         # URLs chính thức để test

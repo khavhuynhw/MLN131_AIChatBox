@@ -45,7 +45,7 @@ class QuizApp {
     async loadQuizById(quizId) {
         try {
             // Show loading
-            document.getElementById('quizCreation').style.display = 'none';
+            document.getElementById('premadeQuizzes').style.display = 'none';
             document.getElementById('loadingContainer').style.display = 'block';
 
             const response = await fetch(`${this.API_BASE}/quiz/${quizId}`);
@@ -75,98 +75,8 @@ class QuizApp {
         });
     }
 
-    // Change question count
-    changeQuestionCount(delta) {
-        const input = document.getElementById('numQuestions');
-        const current = parseInt(input.value) || 15;
-        const newValue = Math.max(5, Math.min(30, current + delta));
-        input.value = newValue;
-    }
 
-    // Generate quiz
-    async generateQuiz() {
-        const chapter = document.getElementById('chapterSelect').value;
-        const numQuestions = parseInt(document.getElementById('numQuestions').value) || 15;
-        const difficulty = document.querySelector('.diff-btn.active').dataset.difficulty || 'medium';
 
-        if (!chapter) {
-            alert('Vui lòng chọn chương');
-            return;
-        }
-
-        // Show loading
-        document.getElementById('quizCreation').style.display = 'block';
-        document.getElementById('loadingContainer').style.display = 'block';
-        document.getElementById('btnGenerate').disabled = true;
-        document.getElementById('quizReady').style.display = 'none';
-
-        try {
-            const response = await fetch(`${this.API_BASE}/quiz/generate`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    chapter: chapter,
-                    num_questions: numQuestions,
-                    difficulty: difficulty
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error('Không thể tạo bài kiểm tra');
-            }
-
-            const quiz = await response.json();
-            this.currentQuiz = quiz;
-
-            // Show success
-            document.getElementById('loadingContainer').style.display = 'none';
-            document.getElementById('quizReady').style.display = 'block';
-            document.getElementById('quizInfo').textContent = 
-                `${quiz.title} - ${quiz.num_questions} câu hỏi - Độ khó: ${this.getDifficultyText(quiz.difficulty)}`;
-
-        } catch (error) {
-            console.error('Error generating quiz:', error);
-            alert('Lỗi khi tạo bài kiểm tra: ' + error.message);
-            document.getElementById('loadingContainer').style.display = 'none';
-        } finally {
-            document.getElementById('btnGenerate').disabled = false;
-        }
-    }
-
-    getDifficultyText(difficulty) {
-        const map = {
-            'easy': 'Dễ',
-            'medium': 'Trung bình',
-            'hard': 'Khó'
-        };
-        return map[difficulty] || difficulty;
-    }
-
-    // Start quiz
-    startQuiz() {
-        if (!this.currentQuiz) return;
-
-        // Hide creation section, show taking section
-        document.getElementById('quizCreation').style.display = 'none';
-        document.getElementById('quizTaking').style.display = 'block';
-
-        // Setup quiz
-        document.getElementById('quizTitle').textContent = this.currentQuiz.title;
-        document.getElementById('quizMeta').textContent = 
-            `${this.currentQuiz.num_questions} câu - ${this.getDifficultyText(this.currentQuiz.difficulty)}`;
-
-        // Render questions
-        this.renderQuestions();
-        this.renderQuestionMap();
-        
-        // Show first question
-        this.showQuestion(0);
-
-        // Start timer
-        this.startTimer();
-    }
 
     renderQuestions() {
         const container = document.getElementById('questionContainer');
@@ -180,14 +90,17 @@ class QuizApp {
             questionDiv.innerHTML = `
                 <h3>Câu ${index + 1}: ${q.question}</h3>
                 <div class="options">
-                    ${Object.entries(q.options).map(([key, value]) => `
-                        <div class="option" onclick="quizApp.selectAnswer(${index}, '${key}')">
-                            <input type="radio" name="q${index}" id="q${index}_${key}" value="${key}">
-                            <label for="q${index}_${key}">
-                                <strong>${key}.</strong> ${value}
+                    ${q.options.map((option, optionIndex) => {
+                        const letter = String.fromCharCode(65 + optionIndex); // A, B, C, D
+                        return `
+                            <div class="option" onclick="quizApp.selectAnswer(${index}, '${letter}')">
+                                <input type="radio" name="q${index}" id="q${index}_${letter}" value="${letter}">
+                                <label for="q${index}_${letter}">
+                                    <strong>${letter}.</strong> ${option}
                             </label>
                         </div>
-                    `).join('')}
+                        `;
+                    }).join('')}
                 </div>
             `;
             
@@ -210,8 +123,21 @@ class QuizApp {
     }
 
     selectAnswer(questionIndex, answer) {
-        // Save answer
-        this.userAnswers[this.currentQuiz.questions[questionIndex].id] = answer;
+        // Convert answer to index (A=0, B=1, C=2, D=3)
+        const answerIndex = answer.charCodeAt(0) - 65; // A=0, B=1, C=2, D=3
+        
+        // Save answer as index
+        const questionId = this.currentQuiz.questions[questionIndex].id;
+        this.userAnswers[questionId] = answerIndex;
+        
+        // Debug log
+        console.log(`Selected answer:`, {
+            questionIndex: questionIndex,
+            answer: answer,
+            answerIndex: answerIndex,
+            questionId: questionId,
+            userAnswers: this.userAnswers
+        });
 
         // Update UI
         const options = document.querySelectorAll(`#question-${questionIndex} .option`);
@@ -293,12 +219,21 @@ class QuizApp {
         document.getElementById('progressText').textContent = `${answered}/${total}`;
     }
 
-    startTimer() {
+    startTimer(timeLimit = null) {
         this.startTime = Date.now();
+        this.timeLimit = timeLimit;
+        
         this.timerInterval = setInterval(() => {
             const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
             const minutes = Math.floor(elapsed / 60);
             const seconds = elapsed % 60;
+            
+            // Check if time limit reached
+            if (this.timeLimit && elapsed >= this.timeLimit) {
+                this.submitQuiz();
+                return;
+            }
+            
             document.getElementById('timer').textContent = 
                 `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }, 1000);
@@ -324,7 +259,13 @@ class QuizApp {
         this.stopTimer();
 
         try {
-            // Submit quiz
+            // Check if this is a pre-made quiz (local JSON file)
+            if (this.currentQuiz.id && this.currentQuiz.id.startsWith('chuong3_quiz_')) {
+                // Calculate result locally for pre-made quizzes
+                const result = this.calculateLocalResult();
+                this.showResult(result);
+            } else {
+                // Submit quiz to server for generated quizzes
             const response = await fetch(`${this.API_BASE}/quiz/submit`, {
                 method: 'POST',
                 headers: {
@@ -343,6 +284,7 @@ class QuizApp {
 
             const result = await response.json();
             this.showResult(result);
+            }
 
         } catch (error) {
             console.error('Error submitting quiz:', error);
@@ -350,9 +292,101 @@ class QuizApp {
         }
     }
 
+    calculateLocalResult() {
+        const totalQuestions = this.currentQuiz.questions.length;
+        let correctCount = 0;
+        const details = [];
+        
+        // Debug log
+        console.log('Calculating result:', {
+            totalQuestions: totalQuestions,
+            userAnswers: this.userAnswers,
+            currentQuiz: this.currentQuiz
+        });
+
+        this.currentQuiz.questions.forEach((question, index) => {
+            const userAnswer = this.userAnswers[question.id];
+            const isCorrect = userAnswer === question.correct_answer;
+            
+            // Debug log
+            console.log(`Question ${index + 1}:`, {
+                question: question.question,
+                userAnswer: userAnswer,
+                correctAnswer: question.correct_answer,
+                isCorrect: isCorrect
+            });
+            
+            if (isCorrect) {
+                correctCount++;
+            }
+
+            details.push({
+                question: question.question,
+                user_answer: userAnswer,
+                correct_answer: question.correct_answer,
+                is_correct: isCorrect,
+                explanation: question.explanation
+            });
+        });
+
+        const score = (correctCount / totalQuestions) * 10; // Convert to 10-point scale
+        const percentage = (correctCount / totalQuestions) * 100;
+
+        const result = {
+            score: score,
+            correct_count: correctCount,
+            total_questions: totalQuestions,
+            percentage: percentage,
+            details: details
+        };
+
+        // Save quiz result to localStorage
+        console.log('Saving quiz result:', result);
+        this.saveQuizResult(result);
+
+        return result;
+    }
+
+    saveQuizResult(result) {
+        try {
+            // Get existing results
+            const existingResults = JSON.parse(localStorage.getItem('quizResults') || '[]');
+            
+            // Create new result entry
+            const newResult = {
+                id: Date.now().toString(),
+                quiz_id: this.currentQuiz.id,
+                quiz_title: this.currentQuiz.title,
+                username: this.user?.username || 'Guest',
+                score: result.score,
+                correct_count: result.correct_count,
+                total_questions: result.total_questions,
+                percentage: result.percentage,
+                completed_at: new Date().toISOString(),
+                details: result.details
+            };
+
+            // Add to beginning of array (most recent first)
+            existingResults.unshift(newResult);
+
+            // Keep only last 50 results
+            if (existingResults.length > 50) {
+                existingResults.splice(50);
+            }
+
+            // Save back to localStorage
+            localStorage.setItem('quizResults', JSON.stringify(existingResults));
+            
+            console.log('Quiz result saved:', newResult);
+        } catch (error) {
+            console.error('Error saving quiz result:', error);
+        }
+    }
+
     showResult(result) {
         // Hide taking section, show result section
         document.getElementById('quizTaking').style.display = 'none';
+        document.getElementById('premadeQuizzes').style.display = 'none';
         document.getElementById('quizResult').style.display = 'block';
 
         // Animate score circle
@@ -402,16 +436,20 @@ class QuizApp {
             const div = document.createElement('div');
             div.className = `answer-detail ${detail.is_correct ? 'correct' : 'wrong'}`;
             
+            // Convert index to letter (0=A, 1=B, 2=C, 3=D)
+            const userAnswerLetter = detail.user_answer !== undefined ? String.fromCharCode(65 + detail.user_answer) : 'Chưa trả lời';
+            const correctAnswerLetter = String.fromCharCode(65 + detail.correct_answer);
+            
             div.innerHTML = `
                 <h4>Câu ${index + 1}: ${detail.question}</h4>
                 <p>Đáp án của bạn: 
                     <span class="${detail.is_correct ? 'correct-answer' : 'wrong-answer'}">
-                        ${detail.user_answer || 'Chưa trả lời'}
+                        ${userAnswerLetter}
                     </span>
                 </p>
                 ${!detail.is_correct ? `
                     <p>Đáp án đúng: 
-                        <span class="correct-answer">${detail.correct_answer}</span>
+                        <span class="correct-answer">${correctAnswerLetter}</span>
                     </p>
                 ` : ''}
                 ${detail.explanation ? `
@@ -427,22 +465,95 @@ class QuizApp {
 
     async showHistory() {
         // Hide all sections
-        document.getElementById('quizCreation').style.display = 'none';
+        document.getElementById('premadeQuizzes').style.display = 'none';
         document.getElementById('quizTaking').style.display = 'none';
         document.getElementById('quizResult').style.display = 'none';
         document.getElementById('historySection').style.display = 'block';
 
+        // Load history from localStorage
+        this.loadHistory();
+    }
+
+    loadHistory() {
         try {
-            const response = await fetch(`${this.API_BASE}/quiz/history/${this.user.username}?limit=20`);
-            if (!response.ok) throw new Error('Không thể tải lịch sử');
+            const results = JSON.parse(localStorage.getItem('quizResults') || '[]');
+            const historyContainer = document.getElementById('historyContent');
+            
+            if (results.length === 0) {
+                historyContainer.innerHTML = `
+                    <div class="no-history">
+                        <i class="fas fa-history"></i>
+                        <h3>Chưa có lịch sử làm bài</h3>
+                        <p>Hãy tham gia các bài quiz để xem lịch sử của bạn!</p>
+                    </div>
+                `;
+                return;
+            }
 
-            const history = await response.json();
-            this.displayHistory(history);
-
+            historyContainer.innerHTML = results.map(result => `
+                <div class="history-item">
+                    <div class="history-header">
+                        <h4>${result.quiz_title}</h4>
+                        <span class="history-date">${new Date(result.completed_at).toLocaleString('vi-VN')}</span>
+                    </div>
+                    <div class="history-stats">
+                        <div class="stat">
+                            <span class="stat-label">Điểm:</span>
+                            <span class="stat-value ${result.percentage >= 80 ? 'excellent' : result.percentage >= 60 ? 'good' : 'poor'}">${result.score.toFixed(1)}/10</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Tỷ lệ:</span>
+                            <span class="stat-value">${result.percentage.toFixed(1)}%</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Đúng:</span>
+                            <span class="stat-value">${result.correct_count}/${result.total_questions}</span>
+                        </div>
+                    </div>
+                    <div class="history-actions">
+                        <button class="btn-view-detail" onclick="quizApp.viewHistoryDetail('${result.id}')">
+                            <i class="fas fa-eye"></i> Xem chi tiết
+                        </button>
+                    </div>
+                </div>
+            `).join('');
         } catch (error) {
             console.error('Error loading history:', error);
-            document.getElementById('historyContent').innerHTML = 
-                '<p style="text-align: center; color: #666;">Không thể tải lịch sử làm bài</p>';
+            document.getElementById('historyContent').innerHTML = `
+                <div class="error-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Có lỗi khi tải lịch sử. Vui lòng thử lại!</p>
+                </div>
+            `;
+        }
+    }
+
+    viewHistoryDetail(resultId) {
+        try {
+            const results = JSON.parse(localStorage.getItem('quizResults') || '[]');
+            const result = results.find(r => r.id === resultId);
+            
+            if (!result) {
+                alert('Không tìm thấy kết quả quiz!');
+                return;
+            }
+
+            // Show detailed result
+            this.showResult(result);
+        } catch (error) {
+            console.error('Error viewing history detail:', error);
+            alert('Có lỗi khi xem chi tiết kết quả!');
+        }
+    }
+
+    debugLocalStorage() {
+        try {
+            const results = JSON.parse(localStorage.getItem('quizResults') || '[]');
+            console.log('LocalStorage quizResults:', results);
+            alert(`Có ${results.length} kết quả quiz trong localStorage. Xem console để chi tiết.`);
+        } catch (error) {
+            console.error('Error reading localStorage:', error);
+            alert('Lỗi khi đọc localStorage: ' + error.message);
         }
     }
 
@@ -479,6 +590,7 @@ class QuizApp {
             
             // Show result section with historical data
             document.getElementById('historySection').style.display = 'none';
+            document.getElementById('premadeQuizzes').style.display = 'none';
             this.showResult(result);
 
         } catch (error) {
@@ -489,7 +601,9 @@ class QuizApp {
 
     backToQuizCreation() {
         document.getElementById('historySection').style.display = 'none';
-        document.getElementById('quizCreation').style.display = 'block';
+        document.getElementById('quizTaking').style.display = 'none';
+        document.getElementById('quizResult').style.display = 'none';
+        document.getElementById('premadeQuizzes').style.display = 'block';
     }
 }
 
@@ -500,17 +614,6 @@ window.addEventListener('DOMContentLoaded', () => {
     quizApp = new QuizApp();
 });
 
-function changeQuestionCount(delta) {
-    quizApp.changeQuestionCount(delta);
-}
-
-function generateQuiz() {
-    quizApp.generateQuiz();
-}
-
-function startQuiz() {
-    quizApp.startQuiz();
-}
 
 function prevQuestion() {
     quizApp.prevQuestion();
@@ -530,4 +633,53 @@ function showHistory() {
 
 function backToQuizCreation() {
     quizApp.backToQuizCreation();
+}
+
+// Function to start pre-made quiz
+async function startPreMadeQuiz(quizId) {
+    try {
+        // Show loading
+        document.getElementById('premadeQuizzes').style.display = 'none';
+        document.getElementById('loadingContainer').style.display = 'block';
+
+        // Load quiz data from local JSON files
+        const response = await fetch(`quiz_data/quizzes/${quizId}.json`);
+        if (!response.ok) {
+            throw new Error('Không thể tải quiz');
+        }
+
+        const quizData = await response.json();
+        
+        // Set current quiz
+        quizApp.currentQuiz = quizData;
+        quizApp.currentQuestionIndex = 0;
+        quizApp.userAnswers = {};
+        quizApp.startTime = new Date();
+
+        // Hide loading and show quiz
+        document.getElementById('loadingContainer').style.display = 'none';
+        document.getElementById('quizTaking').style.display = 'block';
+
+        // Update quiz title and meta
+        document.getElementById('quizTitle').textContent = quizData.title;
+        document.getElementById('quizMeta').textContent = `${quizData.questions.length} câu hỏi • ${quizData.difficulty} • ${Math.floor(quizData.time_limit / 60)} phút`;
+
+        // Render questions and question map
+        quizApp.renderQuestions();
+        quizApp.renderQuestionMap();
+
+        // Start timer
+        quizApp.startTimer(quizData.time_limit);
+
+        // Show first question
+        quizApp.showQuestion(0);
+
+    } catch (error) {
+        console.error('Error loading pre-made quiz:', error);
+        alert('Không thể tải quiz. Vui lòng thử lại.');
+        
+        // Show quiz creation section again
+        document.getElementById('loadingContainer').style.display = 'none';
+        document.getElementById('premadeQuizzes').style.display = 'block';
+    }
 }

@@ -76,7 +76,7 @@ function linkInlineCitations(renderedHtml, citationMap, sources){
 class HCMChatApp {
     constructor() {
         // ===== CẤU HÌNH API =====
-        this.API_BASE = window.NODEJS_API || window.API_BASE_URL || 'http://localhost:9000/api';
+        this.API_BASE = window.NODEJS_API || window.API_BASE_URL || 'http://localhost:9000';
 
         // ===== STATE MANAGEMENT =====
         this.currentConversationId = null; // ID cuộc trò chuyện hiện tại
@@ -97,13 +97,8 @@ class HCMChatApp {
         this.token = localStorage.getItem('token'); // Lấy token từ localStorage
         const userStr = localStorage.getItem('user'); // Lấy thông tin user
 
-        const tokenMissing = !this.token || this.token === 'undefined' || this.token === 'null';
-        const userMissing = !userStr || userStr === 'undefined' || userStr === 'null';
-
-        // Nếu chưa đăng nhập hoặc dữ liệu không hợp lệ, chuyển về trang auth
-        if (tokenMissing || userMissing) {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
+        // Nếu chưa đăng nhập, chuyển về trang auth
+        if (!this.token || !userStr) {
             window.location.href = 'auth.html';
             return;
         }
@@ -469,10 +464,9 @@ class HCMChatApp {
     async loadConversations() {
         try {
             const response = await this.fetchWithAuth('/conversations');
-            if (response && response.ok) {
+            if (response.ok) {
                 const data = await response.json();
-                const payload = data.data || data.conversations || [];
-                this.conversations = Array.isArray(payload) ? payload : [];
+                this.conversations = data.conversations || [];
                 
                 // Debug: Log để kiểm tra cấu trúc dữ liệu conversations từ API
                 if (this.conversations.length > 0) {
@@ -553,10 +547,9 @@ class HCMChatApp {
     async loadMessages(conversationId) {
         try {
             const response = await this.fetchWithAuth(`/conversations/${conversationId}/messages`);
-            if (response && response.ok) {
+            if (response.ok) {
                 const data = await response.json();
-                const payload = data.data || data.messages || [];
-                const messages = Array.isArray(payload) ? payload : [];
+                const messages = data.messages || [];
                 
                 // Debug: Log để kiểm tra cấu trúc dữ liệu từ API
                 if (messages.length > 0) {
@@ -807,7 +800,7 @@ class HCMChatApp {
             // Gọi API tìm ảnh
             const response = await fetch((window.PYTHON_AI_API || 'https://hcm-chat-2.onrender.com') + '/images/search', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json; charset=UTF-8' },
                 body: JSON.stringify({
                     query: query,
                     num_results: 6
@@ -970,7 +963,7 @@ class HCMChatApp {
             
             const response = await fetch(`${window.PYTHON_AI_API}/quiz/generate`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json; charset=UTF-8' },
                 body: JSON.stringify({
                     chapter: chapter,
                     num_questions: numQuestions,
@@ -1156,7 +1149,7 @@ class HCMChatApp {
             const response = await this.fetchWithAuth('/chat/send', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json; charset=UTF-8',
                 },
                 body: JSON.stringify({
                     Message: message,

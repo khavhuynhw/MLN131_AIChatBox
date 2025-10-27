@@ -18,13 +18,17 @@ import google.generativeai as genai
 import json
 import requests
 
+# Import utility for safe printing (handles Windows encoding)
+from .utils import safe_print, setup_utf8_encoding
 
+# Setup UTF-8 encoding for Windows console
+setup_utf8_encoding()
 
 load_dotenv()
 api_key = os.getenv("GEMINI_API_KEY")
 
 if not api_key:
-    raise RuntimeError("⚠️ Không tìm thấy GEMINI_API_KEY — hãy kiểm tra file .env hoặc biến môi trường.")
+    raise RuntimeError("Warning: Cannot find GEMINI_API_KEY — please check .env file or environment variables.")
 
 
 # ===== KHỞI TẠO FASTAPI APPLICATION =====
@@ -85,11 +89,11 @@ class QuizResultResponse(BaseModel):
 async def background_load_knowledge_base():
     """Load knowledge base in the background without blocking startup"""
     try:
-        print("📚 Loading knowledge base in background...")
+        print("Loading knowledge base in background...")
         rag_service.update_knowledge_base(force_update=True)
-        print("✅ Knowledge base loaded successfully!")
+        print("Knowledge base loaded successfully!")
     except Exception as e:
-        print(f"⚠️ Warning: RAG service init failed: {e}")
+        print(f"Warning: RAG service init failed: {e}")
 
 @app.on_event("startup")
 async def startup_event():
@@ -97,8 +101,8 @@ async def startup_event():
     Khởi tạo knowledge base khi server start
     Tải và xử lý tất cả tài liệu về Chủ nghĩa xã hội và thời kỳ quá độ
     """
-    print("🚀 Starting MLN131 Chatbot API...")
-    print("📋 Available endpoints:")
+    print("Starting MLN131 Chatbot API...")
+    print("Available endpoints:")
     for route in app.routes:
         if hasattr(route, 'methods') and hasattr(route, 'path'):
             print(f"  {list(route.methods)} {route.path}")
@@ -106,7 +110,7 @@ async def startup_event():
     # Load knowledge base in background to speed up startup
     import asyncio
     asyncio.create_task(background_load_knowledge_base())
-    print("✅ Server ready! Knowledge base loading in background...")
+    print("Server ready! Knowledge base loading in background...")
 
 # ===== API ENDPOINTS =====
 
@@ -288,20 +292,20 @@ async def get_book_content(slug: str):
 @app.post("/quiz/generate")
 async def generate_quiz(request: QuizGenerateRequest):
     """Tạo bộ câu hỏi tự động dựa trên chương"""
-    print(f"🎯 Received quiz generate request: {request.chapter}, {request.num_questions} questions")
+    print(f"Received quiz generate request: {request.chapter}, {request.num_questions} questions")
     try:
-        print("🔧 Step 1: Checking API key...")
+        print("Step 1: Checking API key...")
         # Cấu hình Gemini
         api_key = os.getenv("GEMINI_API_KEY")
         if not api_key:
-            print("❌ API key not found!")
+            print("ERROR: API key not found!")
             raise HTTPException(status_code=500, detail="Thiếu GEMINI_API_KEY")
         
-        print("🔧 Step 2: Configuring Gemini...")
+        print("Step 2: Configuring Gemini...")
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel('gemini-2.5-pro')
         
-        print("🔧 Step 3: Generating prompt...")
+        print("Step 3: Generating prompt...")
         
         # Prompt để tạo câu hỏi
         prompt = f"""
@@ -335,11 +339,11 @@ async def generate_quiz(request: QuizGenerateRequest):
         CHỈ TRẢ VỀ JSON, KHÔNG CÓ TEXT KHÁC.
         """
         
-        print("🔧 Step 4: Calling Gemini API...")
+        print("Step 4: Calling Gemini API...")
         response = model.generate_content(prompt)
-        print("🔧 Step 5: Getting response text...")
+        print("Step 5: Getting response text...")
         response_text = response.text
-        print(f"📝 Response length: {len(response_text)} chars")
+        print(f"Response length: {len(response_text)} chars")
         
         # Xử lý để lấy JSON
         if '```json' in response_text:
@@ -347,31 +351,31 @@ async def generate_quiz(request: QuizGenerateRequest):
         elif '```' in response_text:
             response_text = response_text.split('```')[1].split('```')[0]
         
-        print("🔧 Step 6: Parsing JSON...")
+        print("Step 6: Parsing JSON...")
         # Parse JSON
         quiz_data = json.loads(response_text.strip())
         
-        print("🔧 Step 7: Adding metadata...")
+        print("Step 7: Adding metadata...")
         # Thêm metadata
         quiz_data['title'] = f"Bài kiểm tra {request.chapter}"
         quiz_data['chapter'] = request.chapter
         quiz_data['difficulty'] = request.difficulty
         quiz_data['num_questions'] = request.num_questions
         
-        print("🔧 Step 8: Saving quiz...")
+        print("Step 8: Saving quiz...")
         # Lưu quiz
         quiz_id = quiz_service.save_quiz(quiz_data)
         quiz_data['id'] = quiz_id
         
-        print(f"✅ Quiz created successfully with ID: {quiz_id}")
+        print(f"SUCCESS: Quiz created successfully with ID: {quiz_id}")
         return quiz_data
         
     except json.JSONDecodeError as e:
-        print(f"❌ JSON Parse Error: {e}")
+        print(f"ERROR: JSON Parse Error: {e}")
         raise HTTPException(status_code=500, detail=f"Lỗi parse JSON từ AI: {str(e)}")
     except Exception as e:
-        print(f"❌ General Error: {e}")
-        print(f"❌ Error type: {type(e)}")
+        print(f"ERROR: General Error: {e}")
+        print(f"ERROR: Error type: {type(e)}")
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Lỗi tạo câu hỏi: {str(e)}")
@@ -381,7 +385,7 @@ async def generate_quiz(request: QuizGenerateRequest):
 @app.post("/images/search")
 async def search_images(request: ImageSearchRequest):
     """Tìm ảnh - DISABLED để tránh external API calls"""
-    print(f"🖼️ Image search request DISABLED: query='{request.query}', num_results={request.num_results}")
+    print(f" Image search request DISABLED: query='{request.query}', num_results={request.num_results}")
     
     # Return empty results to prevent external API calls
     return {
@@ -393,18 +397,18 @@ async def search_images(request: ImageSearchRequest):
     # DISABLED CODE BELOW - External API calls removed
     """
     try:
-        print("🔧 Step 1: Checking API keys...")
+        print("Step 1: Checking API keys...")
         api_key = os.getenv("GOOGLE_CSE_API_KEY")
         cse_id = os.getenv("GOOGLE_CSE_ID")
         
-        print(f"🔧 API Key: {api_key[:20]}..." if api_key else "❌ No API Key")
-        print(f"🔧 CSE ID: {cse_id}")
+        print(f" API Key: {api_key[:20]}..." if api_key else "ERROR: No API Key")
+        print(f" CSE ID: {cse_id}")
         
         if not api_key or not cse_id:
-            print("❌ Missing Google CSE configuration")
+            print("ERROR: Missing Google CSE configuration")
             raise HTTPException(status_code=500, detail="Thiếu cấu hình Google CSE")
         
-        print("🔧 Step 2: Preparing Google CSE request...")
+        print("Step 2: Preparing Google CSE request...")
         # Gọi Google Custom Search API
         url = "https://www.googleapis.com/customsearch/v1"
         params = {
@@ -417,25 +421,25 @@ async def search_images(request: ImageSearchRequest):
             'imgType': 'photo'
         }
         
-        print(f"🔧 Step 3: Calling Google CSE API with params: {params}")
+        print(f"Step 3: Calling Google CSE API with params: {params}")
         response = requests.get(url, params=params)
-        print(f"🔧 Step 4: Response status: {response.status_code}")
+        print(f"Step 4: Response status: {response.status_code}")
         
         if response.status_code != 200:
-            print(f"❌ Google CSE API error: {response.text}")
+            print(f"ERROR: Google CSE API error: {response.text}")
             raise HTTPException(status_code=500, detail=f"Lỗi gọi Google CSE API: {response.status_code}")
         
-        print("🔧 Step 5: Parsing response...")
+        print("Step 5: Parsing response...")
         data = response.json()
-        print(f"📝 Response keys: {list(data.keys())}")
-        print(f"📝 Total results info: {data.get('searchInformation', {})}")
+        print(f"Response keys: {list(data.keys())}")
+        print(f"Total results info: {data.get('searchInformation', {})}")
         
         images = []
         items = data.get('items', [])
-        print(f"📝 Found {len(items)} items")
+        print(f"Found {len(items)} items")
         
         for i, item in enumerate(items):
-            print(f"📝 Processing item {i+1}: {item.get('title', 'No title')}")
+            print(f"Processing item {i+1}: {item.get('title', 'No title')}")
             images.append({
                 'title': item.get('title', ''),
                 'snippet': item.get('snippet', ''),
@@ -445,7 +449,7 @@ async def search_images(request: ImageSearchRequest):
                 'context': item.get('image', {}).get('contextLink', '')
             })
         
-        print(f"✅ Successfully processed {len(images)} images")
+        print(f"SUCCESS: Successfully processed {len(images)} images")
         return {
             'query': request.query,
             'total': len(images),
@@ -453,8 +457,8 @@ async def search_images(request: ImageSearchRequest):
         }
         
     except Exception as e:
-        print(f"❌ Image search error: {e}")
-        print(f"❌ Error type: {type(e)}")
+        print(f"ERROR: Image search error: {e}")
+        print(f"ERROR: Error type: {type(e)}")
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Lỗi tìm ảnh: {str(e)}")

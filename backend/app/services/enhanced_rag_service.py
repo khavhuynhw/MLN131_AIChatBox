@@ -29,7 +29,7 @@ class EnhancedRAGService:
         chapter03_path = os.path.join(os.path.dirname(__file__), "../../data/book/chuong3.md")
         
         if not os.path.exists(chapter03_path):
-            print(f"⚠️ Không tìm thấy file {chapter03_path}")
+            print(f"File not found: {chapter03_path}")
             return
         
         with open(chapter03_path, 'r', encoding='utf-8') as f:
@@ -91,9 +91,9 @@ class EnhancedRAGService:
 
     def load_chapter03_data(self):
         """Load dữ liệu Chương 03 vào vector store"""
-        print("🔄 Đang tải dữ liệu Chương 03...")
+        print("Loading Chapter 03 data...")
         self.add_chapter03_corpus()
-        print("✅ Hoàn thành tải dữ liệu Chương 03!")
+        print("Chapter 03 data loaded successfully!")
 
     def ingest_markdown_folder(self, folder_path: str):
         """Đọc tất cả các file .md trong thư mục và đưa vào vector store.
@@ -295,7 +295,7 @@ class EnhancedRAGService:
         ]
         
         is_mindmap = any(kw in q_norm for kw in mindmap_keywords)
-        print(f"🔍 MINDMAP DEBUG: '{question}' -> normalized: '{q_norm}' -> is_mindmap: {is_mindmap}")
+        print(f"MINDMAP DEBUG: '{question}' -> normalized: '{q_norm}' -> is_mindmap: {is_mindmap}")
         return is_mindmap
     
     def detect_off_topic_question(self, question: str) -> bool:
@@ -370,7 +370,7 @@ class EnhancedRAGService:
         # Kết hợp cả hai điều kiện
         is_inappropriate = is_off_topic or is_emotional
         
-        print(f"🔍 OFF-TOPIC DEBUG: '{question}' -> normalized: '{q_norm}' -> is_off_topic: {is_off_topic}, is_emotional: {is_emotional}, is_inappropriate: {is_inappropriate}")
+        print(f"OFF-TOPIC DEBUG: '{question}' -> normalized: '{q_norm}' -> is_off_topic: {is_off_topic}, is_emotional: {is_emotional}, is_inappropriate: {is_inappropriate}")
         return is_inappropriate
     
     def _handle_off_topic_question(self, question: str):
@@ -388,31 +388,31 @@ class EnhancedRAGService:
         if is_emotional:
             response = f"""Tôi hiểu bạn muốn đánh giá về chủ nghĩa xã hội, nhưng tôi là chatbot học thuật chuyên cung cấp **thông tin khách quan** về **Chủ nghĩa xã hội và thời kỳ quá độ lên chủ nghĩa xã hội**.
 
-### 🎯 Thay vì đánh giá chủ quan, tôi có thể giúp bạn hiểu:
+### Thay vì đánh giá chủ quan, tôi có thể giúp bạn hiểu:
 
-**📖 Về mặt lý luận:**
+**Về mặt lý luận:**
 - Định nghĩa chủ nghĩa xã hội theo 4 góc độ
 - Đặc trưng bản chất của chủ nghĩa xã hội
 - Quan điểm của Mác - Lênin về CNXH
 
-**🏗️ Về mặt thực tiễn:**
+**Về mặt thực tiễn:**
 - Thời kỳ quá độ lên chủ nghĩa xã hội
 - Sự vận dụng của Đảng Cộng sản Việt Nam
 - Mục tiêu và phương hướng xây dựng CNXH
 
-### 💡 Câu hỏi học thuật phù hợp:
+### Câu hỏi học thuật phù hợp:
 - "Chủ nghĩa xã hội là gì?"
 - "Đặc trưng của chủ nghĩa xã hội?"
 - "Thời kỳ quá độ có đặc điểm gì?"
 - "Lênin nhấn mạnh điều gì?"
 
-Hãy hỏi tôi về những khía cạnh học thuật này để có cái nhìn toàn diện! 📚"""
+Hãy hỏi tôi về những khía cạnh học thuật này để có cái nhìn toàn diện!"""
         else:
             response = f"""Xin lỗi, tôi là chatbot chuyên về **Chủ nghĩa xã hội và thời kỳ quá độ lên chủ nghĩa xã hội**. 
 
 Tôi không thể trả lời câu hỏi về chủ đề khác, nhưng tôi có thể giúp bạn tìm hiểu về:
 
-### 📚 Các chủ đề tôi có thể hỗ trợ:
+### Các chủ đề tôi có thể hỗ trợ:
 - **Định nghĩa chủ nghĩa xã hội** (4 góc độ tiếp cận)
 - **Đặc trưng bản chất** của chủ nghĩa xã hội
 - **Thời kỳ quá độ** lên chủ nghĩa xã hội
@@ -420,7 +420,7 @@ Tôi không thể trả lời câu hỏi về chủ đề khác, nhưng tôi có
 - **Sự vận dụng** của Đảng Cộng sản Việt Nam
 - **Mục tiêu và phương hướng** xây dựng CNXH ở Việt Nam
 
-### 💡 Gợi ý câu hỏi:
+### Gợi ý câu hỏi:
 - "Chủ nghĩa xã hội là gì?"
 - "Đặc trưng của chủ nghĩa xã hội?"
 - "Thời kỳ quá độ có đặc điểm gì?"
@@ -457,13 +457,13 @@ Hãy thử hỏi tôi về những chủ đề trên nhé! 😊"""
         - Xử lý đặc biệt cho yêu cầu tóm tắt chương: đọc toàn bộ nội dung chương.
         """
         try:
-            print(f"🎯 RAG SERVICE: Processing question: '{question}'")
+            print(f"RAG SERVICE: Processing question: '{question}'")
             
             # Kiểm tra xem có phải yêu cầu tóm tắt chương không
             is_chapter_summary, chapter_name = self.detect_chapter_summary_request(question)
             
             if is_chapter_summary and chapter_name:
-                print(f"📖 CHAPTER SUMMARY detected: {chapter_name}")
+                print(f"CHAPTER SUMMARY detected: {chapter_name}")
                 # Xử lý đặc biệt cho tóm tắt chương
                 return self._handle_chapter_summary(question, chapter_name)
             
@@ -483,7 +483,7 @@ Hãy thử hỏi tôi về những chủ đề trên nhé! 😊"""
             # Nếu hỏi về định nghĩa chủ nghĩa xã hội, tìm kiếm thêm đoạn định nghĩa 4 góc độ
             qn = self._normalize(question)
             if any(k in qn for k in ['chu nghia xa hoi la gi', 'chủ nghĩa xã hội là gì', 'định nghĩa chủ nghĩa xã hội']):
-                print(f"🔍 Tìm kiếm thêm đoạn định nghĩa 4 góc độ...")
+                print(f"Tìm kiếm thêm đoạn định nghĩa 4 góc độ...")
                 def_search = self.vector_store.search('có thể được tiếp cận từ nhiều góc độ', n_results=3)
                 if def_search['documents'][0]:
                     # Thêm đoạn định nghĩa vào đầu kết quả
@@ -501,11 +501,11 @@ Hãy thử hỏi tôi về những chủ đề trên nhé! 😊"""
             docs = search_results['documents'][0][:3] if search_results['documents'][0] else []
             
             # Debug logging (rút gọn)
-            print(f"🔍 RAG DEBUG: score={best_score:.3f}, docs={len(docs)}")
+            print(f"RAG DEBUG: score={best_score:.3f}, docs={len(docs)}")
             
             # Điều kiện fallback đơn giản - chỉ khi thực sự không có docs hoặc score quá thấp
             should_fallback = (not docs) or (best_score < min_score)
-            print(f"   Final should fallback: {should_fallback}")
+            print(f"  Final should fallback: {should_fallback}")
             
             if should_fallback:
                 # Fallback: không có nội dung trong .md → trả lời trực tiếp bằng Gemini
@@ -933,21 +933,21 @@ Chỉ trả về mermaid code:"""
                 )
                 
                 # Debug Gemini response chi tiết 
-                print(f"🤖 Gemini response type: {type(response)}")
+                print(f"Gemini response type: {type(response)}")
                 
                 # Check safety filters và finish reason
                 if hasattr(response, 'prompt_feedback'):
-                    print(f"🛡️ prompt_feedback: {response.prompt_feedback}")
+                    print(f"prompt_feedback: {response.prompt_feedback}")
                 
                 if hasattr(response, 'candidates') and response.candidates:
                     candidate = response.candidates[0]
-                    print(f"🏁 finish_reason: {getattr(candidate, 'finish_reason', 'Unknown')}")
-                    print(f"🛡️ safety_ratings: {getattr(candidate, 'safety_ratings', [])}")
-                    print(f"🔍 candidate.content.parts: {len(candidate.content.parts)} parts")
+                    print(f"finish_reason: {getattr(candidate, 'finish_reason', 'Unknown')}")
+                    print(f"safety_ratings: {getattr(candidate, 'safety_ratings', [])}")
+                    print(f"candidate.content.parts: {len(candidate.content.parts)} parts")
                 
                 # Nếu không có parts, có thể bị block - thử prompt đơn giản hơn
                 if hasattr(response, 'candidates') and response.candidates and len(response.candidates[0].content.parts) == 0:
-                    print("⚠️ No content parts found - possible content blocked. Trying simple fallback...")
+                    print("No content parts found - possible content blocked. Trying simple fallback...")
                     
                     # Fallback với prompt siêu đơn giản
                     simple_prompt = f"""Create a simple mindmap about: {topic}
@@ -964,7 +964,7 @@ mindmap
       Item D
 ```"""
                     
-                    print(f"🔄 Trying simplified prompt...")
+                    print(f"Trying simplified prompt...")
                     fallback_response = self.model.generate_content(simple_prompt)
                     
                     try:
@@ -988,7 +988,7 @@ mindmap
                         mermaid_code = response.text or ""
                         print(f"✅ Successfully got response.text: {len(mermaid_code)} chars")
                     except Exception as e:
-                        print(f"⚠️ response.text failed: {e}")
+                        print(f"response.text failed: {e}")
                         # Extract từ parts như trước
                         if hasattr(response, 'candidates') and response.candidates:
                             parts = response.candidates[0].content.parts

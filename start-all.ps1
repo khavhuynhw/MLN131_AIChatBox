@@ -48,8 +48,17 @@ function Start-ServiceProc {
     }
 
     # Use cmd.exe redirection for stdout and stderr to avoid conflicts
-    $p = Start-Process -FilePath $FilePath -ArgumentList $Arguments -WorkingDirectory $WorkingDirectory `
-        -NoNewWindow -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+    $processInfo = @{
+        FilePath = $FilePath
+        ArgumentList = $Arguments
+        WorkingDirectory = $WorkingDirectory
+        NoNewWindow = $true
+        PassThru = $true
+        RedirectStandardOutput = $stdout
+        RedirectStandardError = $stderr
+    }
+    
+    $p = Start-Process @processInfo
 
     $pidPath = Join-Path $global:LogsDir ("{0}.pid" -f ($Name.ToLower()))
     Set-Content -Path $pidPath -Value $p.Id
@@ -134,6 +143,8 @@ $ok = Start-ServiceProc -Name 'NET_API' -FilePath 'dotnet' -Arguments $dnArgs -W
 if ($ok) { [void](Wait-ForUrl -Name '.NET API' -Url "http://localhost:$DotnetPort/health") }
 
 # --- 2) Start Python AI Backend ---
+# Set UTF-8 encoding environment variable for Python (will be inherited by child processes)
+$env:PYTHONIOENCODING = 'utf-8'
 $pyArgs = @('-m','uvicorn','app.main:app','--host','0.0.0.0','--port',"$PythonPort")
 $ok = Start-ServiceProc -Name 'PYTHON_AI' -FilePath $pythonCmd -Arguments $pyArgs -WorkingDirectory $backendDir -Port $PythonPort -LogFile 'python-ai.log'
 if ($ok) { [void](Wait-ForUrl -Name 'Python AI' -Url "http://localhost:$PythonPort/health" -MaxAttempts 120 -DelaySeconds 2) }

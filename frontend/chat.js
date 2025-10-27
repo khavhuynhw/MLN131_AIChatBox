@@ -463,10 +463,11 @@ class HCMChatApp {
 
     async loadConversations() {
         try {
-            const response = await this.fetchWithAuth('/conversations');
+            const response = await this.fetchWithAuth('/api/conversations');
             if (response.ok) {
-                const data = await response.json();
-                this.conversations = data.conversations || [];
+                const result = await response.json();
+                // .NET API returns { success, message, data: [...] }
+                this.conversations = result.data || [];
                 
                 // Debug: Log để kiểm tra cấu trúc dữ liệu conversations từ API
                 if (this.conversations.length > 0) {
@@ -546,10 +547,11 @@ class HCMChatApp {
 
     async loadMessages(conversationId) {
         try {
-            const response = await this.fetchWithAuth(`/conversations/${conversationId}/messages`);
+            const response = await this.fetchWithAuth(`/api/messages/conversation/${conversationId}`);
             if (response.ok) {
-                const data = await response.json();
-                const messages = data.messages || [];
+                const result = await response.json();
+                // .NET API returns { success, message, data: [...] }
+                const messages = result.data || [];
                 
                 // Debug: Log để kiểm tra cấu trúc dữ liệu từ API
                 if (messages.length > 0) {
@@ -1145,8 +1147,8 @@ class HCMChatApp {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 seconds timeout
 
-            // Gọi Node.js API với authentication (match .NET API endpoint)
-            const response = await this.fetchWithAuth('/chat/send', {
+            // Gọi .NET API với authentication
+            const response = await this.fetchWithAuth('/api/chat/send', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json; charset=UTF-8',
@@ -1895,22 +1897,22 @@ class HCMChatApp {
                 <div class="empty-state" style="animation: fadeInScale 0.6s ease-out;">
                     <i class="fas fa-comment-dots"></i>
                     <h3>Cuộc trò chuyện mới</h3>
-                    <p>Hãy bắt đầu với câu hỏi đầu tiên về tư tưởng Hồ Chí Minh</p>
+                    <p>Hãy bắt đầu với câu hỏi đầu tiên về chủ nghĩa xã hội học</p>
                     
                     <div class="suggestion-topics">
-                        <div class="topic-btn" onclick="chatApp.sendSuggestedMessage('Tư tưởng Hồ Chí Minh về độc lập dân tộc là gì?')">
+                        <div class="topic-btn" onclick="chatApp.sendSuggestedMessage('Chủ nghĩa xã hội học là gì?')">
                             <h4>🇻🇳 Độc lập dân tộc</h4>
-                            <p>Tìm hiểu về tư tưởng độc lập của Bác Hồ</p>
+                            <p>Tìm hiểu về chủ nghĩa xã hội học</p>
                         </div>
-                        <div class="topic-btn" onclick="chatApp.sendSuggestedMessage('Giải thích tư tưởng dân chủ của Hồ Chí Minh')">
+                        <div class="topic-btn" onclick="chatApp.sendSuggestedMessage('Giải thích chủ nghĩa xã hội học')">
                             <h4>🏛️ Dân chủ</h4>
                             <p>Khám phá quan điểm về dân chủ</p>
                         </div>
-                        <div class="topic-btn" onclick="chatApp.sendSuggestedMessage('Tư tưởng đạo đức của Hồ Chí Minh có gì đặc biệt?')">
+                        <div class="topic-btn" onclick="chatApp.sendSuggestedMessage('dân chủ trong chủ nghĩa xã hội là gì ?')">
                             <h4>🌟 Đạo đức</h4>
                             <p>Tìm hiểu về phẩm chất đạo đức</p>
                         </div>
-                        <div class="topic-btn" onclick="chatApp.sendSuggestedMessage('Hồ Chí Minh nói gì về giáo dục?')">
+                        <div class="topic-btn" onclick="chatApp.sendSuggestedMessage('tại sao cần phải nâng cao tính chất con người chủ nghĩa xã hội ?')">
                             <h4>📚 Giáo dục</h4>
                             <p>Quan điểm về giáo dục và học tập</p>
                         </div>
@@ -1947,7 +1949,7 @@ class HCMChatApp {
         }
 
         try {
-            const response = await this.fetchWithAuth(`/conversations/${conversationId}`, {
+            const response = await this.fetchWithAuth(`/api/conversations/${conversationId}`, {
                 method: 'DELETE'
             });
 

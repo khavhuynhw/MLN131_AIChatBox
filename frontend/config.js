@@ -12,14 +12,14 @@ const API_CONFIG = {
     // Development URLs (local)
     development: {
         PYTHON_AI_API: 'https://mln131-aichatbox.onrender.com',
-        DOTNET_API: 'http://localhost:9000',
-        NODEJS_API: 'http://localhost:9000'
+        DOTNET_API: 'https://mln131-dotnet.onrender.com',
+        NODEJS_API: 'https://mln131-dotnet.onrender.com'
     },
     
     // Production URLs  
     production: {
         PYTHON_AI_API: 'https://mln131-aichatbox.onrender.com',
-        NODEJS_API: 'https://hcm-chatbot-nodejs-api.fly.dev'
+        NODEJS_API: 'https://mln131-dotnet.onrender.com'
     }
 };
 

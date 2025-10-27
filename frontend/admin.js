@@ -8,7 +8,7 @@ class AdminDashboard {
     constructor() {
         console.log('🚀 AdminDashboard constructor called - Script loaded successfully!');
         // ===== CẤU HÌNH API =====
-        this.API_BASE = window.NODEJS_API || window.API_BASE_URL || 'http://localhost:9000';
+        this.API_BASE = window.DOTNET_API || window.API_BASE_URL || 'http://localhost:9000';
 
         // ===== STATE MANAGEMENT =====
         this.user = null;
@@ -403,7 +403,7 @@ class AdminDashboard {
      */
     async fetchWithAuth(endpoint, options = {}) {
         try {
-            const url = this.API_BASE + endpoint;
+            const url = this.API_BASE +'/api'+ endpoint;
             const headers = {
                 'Authorization': `Bearer ${this.token}`,
                 'Content-Type': 'application/json',
@@ -487,7 +487,7 @@ class AdminDashboard {
         }
 
         try {
-            const response = await this.fetchWithAuth(`/dashboard/users/${userId}/status`, {
+            const response = await this.fetchWithAuth(`/api/dashboard/users/${userId}/status`, {
                 method: 'PUT',
                 body: JSON.stringify({ status: newStatus })
             });
@@ -514,7 +514,7 @@ class AdminDashboard {
         }
 
         try {
-            const response = await this.fetchWithAuth(`/dashboard/users/${userId}/role`, {
+            const response = await this.fetchWithAuth(`/api/dashboard/users/${userId}/role`, {
                 method: 'PUT',
                 body: JSON.stringify({ role: 'admin' })
             });
@@ -549,7 +549,7 @@ class AdminDashboard {
         }
 
         try {
-            const response = await this.fetchWithAuth(`/dashboard/users/${userId}`, {
+            const response = await this.fetchWithAuth(`/api/dashboard/users/${userId}`, {
                 method: 'DELETE'
             });
 
@@ -595,7 +595,7 @@ class AdminDashboard {
                 return;
             }
 
-            const response = await this.fetchWithAuth(`/auth/profile`, {
+            const response = await this.fetchWithAuth(`/api/auth/profile`, {
                 method: 'PUT',
                 body: JSON.stringify({
                     email: email,
@@ -652,7 +652,7 @@ class AdminDashboard {
                 return;
             }
 
-            const response = await this.fetchWithAuth(`/auth/change-password`, {
+            const response = await this.fetchWithAuth(`/api/auth/change-password`, {
                 method: 'POST',
                 body: JSON.stringify({
                     currentPassword: currentPassword,

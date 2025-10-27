@@ -6,7 +6,7 @@
 class AdminDashboard {
     constructor() {
         // ===== CẤU HÌNH API =====
-        this.API_BASE = window.NODEJS_API || window.API_BASE_URL || 'http://localhost:8001';
+        this.API_BASE = window.DOTNET_API || window.API_BASE_URL || 'http://localhost:9000';
 
         // ===== STATE MANAGEMENT =====
         this.user = null;
@@ -125,7 +125,7 @@ class AdminDashboard {
     async loadDashboardData() {
         try {
             // Load basic stats
-            const response = await this.fetchWithAuth('/dashboard/stats');
+            const response = await this.fetchWithAuth('/api/dashboard/stats');
             if (response && response.ok) {
                 const data = await response.json();
                 const stats = data.data;
@@ -156,7 +156,7 @@ class AdminDashboard {
     async loadDetailedChatStats() {
         try {
             // Load message stats
-            const messageResponse = await this.fetchWithAuth('/dashboard/messages/stats');
+            const messageResponse = await this.fetchWithAuth('/api/dashboard/messages/stats');
             if (messageResponse && messageResponse.ok) {
                 const messageData = await messageResponse.json();
                 const messageStats = messageData.data;
@@ -168,7 +168,7 @@ class AdminDashboard {
             }
 
             // Load user activity stats
-            const userResponse = await this.fetchWithAuth('/dashboard/users/stats');
+            const userResponse = await this.fetchWithAuth('/api/dashboard/users/stats');
             if (userResponse && userResponse.ok) {
                 const userData = await userResponse.json();
                 const userStats = userData.data;
@@ -179,7 +179,7 @@ class AdminDashboard {
             }
 
             // Load recent messages to calculate average confidence
-            const recentMessagesResponse = await this.fetchWithAuth('/dashboard/messages');
+            const recentMessagesResponse = await this.fetchWithAuth('/api/dashboard/messages');
             if (recentMessagesResponse && recentMessagesResponse.ok) {
                 const recentData = await recentMessagesResponse.json();
                 const recentMessages = recentData.data || [];
@@ -210,7 +210,7 @@ class AdminDashboard {
         const container = document.getElementById('usersContent');
 
         try {
-            const response = await this.fetchWithAuth('/dashboard/users');
+            const response = await this.fetchWithAuth('/api/dashboard/users');
             if (response.ok) {
                 const data = await response.json();
                 const users = data.data || [];
@@ -283,7 +283,7 @@ class AdminDashboard {
         const container = document.getElementById('conversationsContent');
 
         try {
-            const response = await this.fetchWithAuth('/dashboard/conversations');
+            const response = await this.fetchWithAuth('/api/dashboard/conversations');
             if (response.ok) {
                 const data = await response.json();
                 const conversations = data.data || [];
@@ -335,7 +335,7 @@ class AdminDashboard {
         const container = document.getElementById('messagesContent');
 
         try {
-            const response = await this.fetchWithAuth('/dashboard/messages');
+            const response = await this.fetchWithAuth('/api/dashboard/messages');
             if (response.ok) {
                 const data = await response.json();
                 const messages = data.data || [];
@@ -474,7 +474,7 @@ class AdminDashboard {
         }
 
         try {
-            const response = await this.fetchWithAuth(`/dashboard/users/${userId}/status`, {
+            const response = await this.fetchWithAuth(`/api/dashboard/users/${userId}/status`, {
                 method: 'PUT',
                 body: JSON.stringify({ status: newStatus })
             });
@@ -501,7 +501,7 @@ class AdminDashboard {
         }
 
         try {
-            const response = await this.fetchWithAuth(`/dashboard/users/${userId}/role`, {
+            const response = await this.fetchWithAuth(`/api/dashboard/users/${userId}/role`, {
                 method: 'PUT',
                 body: JSON.stringify({ role: 'admin' })
             });
@@ -536,7 +536,7 @@ class AdminDashboard {
         }
 
         try {
-            const response = await this.fetchWithAuth(`/dashboard/users/${userId}`, {
+            const response = await this.fetchWithAuth(`/api/dashboard/users/${userId}`, {
                 method: 'DELETE'
             });
 

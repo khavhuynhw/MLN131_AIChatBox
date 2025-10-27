@@ -76,7 +76,7 @@ function linkInlineCitations(renderedHtml, citationMap, sources){
 class HCMChatApp {
     constructor() {
         // ===== CẤU HÌNH API =====
-        this.API_BASE = window.NODEJS_API || window.API_BASE_URL || 'http://localhost:9000';
+        this.API_BASE = window.DOTNET_API || window.API_BASE_URL || 'http://localhost:9000';
 
         // ===== STATE MANAGEMENT =====
         this.currentConversationId = null; // ID cuộc trò chuyện hiện tại
@@ -2354,7 +2354,7 @@ async function updateUserProfile() {
             return;
         }
 
-        const response = await fetch(`${chatApp.API_BASE}/auth/profile`, {
+        const response = await fetch(`${chatApp.API_BASE}/api/auth/profile`, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -2416,7 +2416,7 @@ async function changeUserPassword() {
             return;
         }
 
-        const response = await fetch(`${chatApp.API_BASE}/auth/change-password`, {
+        const response = await fetch(`${chatApp.API_BASE}/api/auth/change-password`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,

@@ -11,14 +11,14 @@ const isDevelopment = window.location.hostname === 'localhost' ||
 const API_CONFIG = {
     // Development URLs (local)
     development: {
-        PYTHON_AI_API: 'http://localhost:8000',
+        PYTHON_AI_API: 'https://mln131-aichatbox.onrender.com',
         DOTNET_API: 'http://localhost:9000',
         NODEJS_API: 'http://localhost:9000'
     },
     
     // Production URLs  
     production: {
-        PYTHON_AI_API: 'https://hcm-chat-2.onrender.com',
+        PYTHON_AI_API: 'https://mln131-aichatbox.onrender.com',
         NODEJS_API: 'https://hcm-chatbot-nodejs-api.fly.dev'
     }
 };
